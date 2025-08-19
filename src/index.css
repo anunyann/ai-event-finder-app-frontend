@@ -2,41 +2,65 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* AI Event Finder Design System - Rich glassmorphism with gradients */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
+    /* Background System */
+    --background: 247 247 251; /* #F7F7FB */
+    --foreground: 240 10% 3.9%; /* Zinc-900 */
+    
+    /* Surface System - Glassy cards */
+    --card: 255 255 255 / 0.8; /* White with transparency for glass effect */
+    --card-foreground: 240 10% 3.9%;
+    --card-border: 255 255 255 / 0.2;
+    
+    /* Interactive Elements */
+    --popover: 255 255 255 / 0.95;
+    --popover-foreground: 240 10% 3.9%;
+    
+    /* Brand Colors - Indigo + Fuchsia */
+    --primary: 239 68% 68%; /* #4F46E5 Indigo */
+    --primary-foreground: 255 255 255;
+    --accent: 320 91% 61%; /* #D946EF Fuchsia */
+    --accent-foreground: 255 255 255;
+    
+    /* Success & Status */
+    --success: 160 84% 39%; /* #10B981 Emerald */
+    --success-foreground: 255 255 255;
+    
+    /* Neutral Tones */
+    --secondary: 240 4.8% 95.9%; /* Light gray */
+    --secondary-foreground: 240 10% 3.9%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%; /* Zinc-600 */
+    
+    /* Interactive States */
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-
-    --radius: 0.5rem;
+    --destructive-foreground: 255 255 255;
+    --border: 240 5.9% 90%; /* Subtle borders */
+    --input: 240 5.9% 90%;
+    --ring: 239 68% 68%; /* Primary for focus rings */
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(239 68% 68%) 0%, hsl(320 91% 61%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(239 68% 68%) 0%, hsl(320 91% 61%) 100%);
+    --gradient-card: linear-gradient(135deg, hsl(255 255 255 / 0.1) 0%, hsl(255 255 255 / 0.05) 100%);
+    --gradient-background: radial-gradient(ellipse at top, hsl(247 247 251) 0%, hsl(241 245 249) 100%);
+    
+    /* Glass Effects */
+    --glass-bg: rgba(255, 255, 255, 0.1);
+    --glass-border: rgba(255, 255, 255, 0.2);
+    --glass-blur: blur(12px);
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    --shadow-elegant: 0 10px 30px -10px hsl(239 68% 68% / 0.3);
+    --shadow-hover: 0 20px 40px -12px hsl(239 68% 68% / 0.4);
+    
+    /* Layout */
+    --radius: 1rem; /* More generous radius for modern look */
 
     --sidebar-background: 0 0% 98%;
 
@@ -56,41 +80,106 @@ All colors MUST be HSL.
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
+    /* Dark Mode - Deep space with gradients */
+    --background: 11 16 32; /* #0B1020 */
+    --foreground: 240 5% 96%; /* Zinc-100 */
+    
+    /* Dark Surface System */
+    --card: 11 16 32 / 0.8; /* Dark with transparency */
+    --card-foreground: 240 5% 96%;
+    --card-border: 255 255 255 / 0.1;
+    
+    --popover: 11 16 32 / 0.95;
+    --popover-foreground: 240 5% 96%;
+    
+    /* Brand colors remain vibrant in dark */
+    --primary: 239 68% 68%; /* Keep same indigo */
+    --primary-foreground: 255 255 255;
+    --accent: 320 91% 61%; /* Keep same fuchsia */
+    --accent-foreground: 255 255 255;
+    
+    --success: 160 84% 39%;
+    --success-foreground: 255 255 255;
+    
+    /* Dark Neutrals */
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 240 5% 96%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%; /* Zinc-400 */
+    
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 240 5% 96%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 239 68% 68%;
+    
+    /* Dark Gradients */
+    --gradient-background: radial-gradient(ellipse at top, hsl(11 16 32) 0%, hsl(8 14 28) 100%);
+    --gradient-card: linear-gradient(135deg, hsl(255 255 255 / 0.05) 0%, hsl(255 255 255 / 0.02) 100%);
+    
+    /* Dark Glass Effects */
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    
+    /* Dark Shadows with primary color */
+    --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
+    --shadow-elegant: 0 10px 30px -10px hsl(239 68% 68% / 0.4);
+    --shadow-hover: 0 20px 40px -12px hsl(239 68% 68% / 0.5);
+  }
+}
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+/* Glass Morphism Utilities */
+@layer components {
+  .glass-card {
+    @apply bg-card/80 backdrop-blur-xl border border-card-border rounded-2xl;
+    box-shadow: var(--shadow-glass);
+  }
+  
+  .glass-card-hover {
+    @apply glass-card transition-all duration-300 hover:-translate-y-0.5;
+    @apply hover:shadow-[var(--shadow-hover)];
+  }
+  
+  .gradient-primary {
+    background: var(--gradient-primary);
+  }
+  
+  .gradient-hero {
+    background: var(--gradient-hero);
+  }
+  
+  .gradient-background {
+    background: var(--gradient-background);
+  }
+  
+  .text-gradient {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  /* Chat bubbles */
+  .chat-bubble-user {
+    @apply bg-primary text-primary-foreground rounded-2xl rounded-br-md px-4 py-2;
+    background: var(--gradient-primary);
+  }
+  
+  .chat-bubble-ai {
+    @apply glass-card px-4 py-2 rounded-2xl rounded-bl-md;
+    border: 1px solid hsl(var(--accent) / 0.3);
+  }
+  
+  /* Noise texture for backgrounds */
+  .noise-texture::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.05;
+    background-image: 
+      radial-gradient(circle at 1px 1px, rgba(0,0,0,0.15) 1px, transparent 0);
+    background-size: 20px 20px;
+    pointer-events: none;
   }
 }
 
@@ -100,6 +189,20 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground relative;
+    background: var(--gradient-background);
+  }
+  
+  /* Add noise texture to body */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    opacity: 0.03;
+    background-image: 
+      radial-gradient(circle at 1px 1px, rgba(0,0,0,0.2) 1px, transparent 0);
+    background-size: 20px 20px;
+    pointer-events: none;
+    z-index: -1;
   }
 }
