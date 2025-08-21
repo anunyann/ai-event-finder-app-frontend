@@ -64,14 +64,7 @@ export function EventCard({ event, onViewDetails, onManageParticipants }: EventC
 
         {/* Actions */}
         <div className="flex items-center justify-between pt-4 border-t border-border">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onViewDetails}
-            className="hover:bg-muted/50"
-          >
-            View Details
-          </Button>
+          
           
           <Button
             variant="outline"
