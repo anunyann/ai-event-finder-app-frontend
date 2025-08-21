@@ -1,4 +1,4 @@
-import { User, Event, CreateEventPayload, AuthResponse, MessageResponse, ApiError } from './types';
+import { User, Event, CreateEventPayload, AuthResponse, MessageResponse, ApiError, ProfileForm } from './types';
 
 const BASE_URL = '/api'
 
@@ -75,11 +75,17 @@ class ApiClient {
       body: JSON.stringify(user),
     });
   }
-
-
+  async getUserByEmail(email: string): Promise<User>{
+    return this.request<User>(`/users/email/${encodeURIComponent(email)}`, {
+    })
+  }
   async getUsers(): Promise<User[]> {
     return this.request<User[]>('/users');
   }
+  async updateUser(updated: ProfileForm){
+    return updated // fix this when update user route gets implemented
+  }
+
 
   // -------- Events --------
   async getEvents(): Promise<Event[]> {
