@@ -1,6 +1,14 @@
-import { User, Event, CreateEventPayload, AuthResponse, MessageResponse, ApiError, ProfileForm } from './types';
+import {
+  User,
+  Event,
+  CreateEventPayload,
+  AuthResponse,
+  MessageResponse,
+  ApiError,
+  ProfileForm
+} from './types';
 
-const BASE_URL = '/api'
+const BASE_URL = '/api';
 
 class ApiClient {
   private getToken(): string | null {
@@ -75,17 +83,18 @@ class ApiClient {
       body: JSON.stringify(user),
     });
   }
-  async getUserByEmail(email: string): Promise<User>{
-    return this.request<User>(`/users/email/${encodeURIComponent(email)}`, {
-    })
+
+  async getUserByEmail(email: string): Promise<User> {
+    return this.request<User>(`/users/email/${encodeURIComponent(email)}`);
   }
+
   async getUsers(): Promise<User[]> {
     return this.request<User[]>('/users');
   }
-  async updateUser(updated: ProfileForm){
-    return updated // fix this when update user route gets implemented
-  }
 
+  async updateUser(updated: ProfileForm) {
+    return updated; // TODO: hook up when update route exists
+  }
 
   // -------- Events --------
   async getEvents(): Promise<Event[]> {
@@ -103,12 +112,19 @@ class ApiClient {
     return this.request<Event>(`/events/title/${encodeURIComponent(title)}`);
   }
 
+  // Frontend filtering instead of backend endpoints
   async getEventsByLocation(location: string): Promise<Event[]> {
-    return this.request<Event[]>(`/events/location/${encodeURIComponent(location)}`);
+    const events = await this.getEvents();
+    return events.filter(
+      e => e.location?.trim().toLowerCase() === location.trim().toLowerCase()
+    );
   }
 
   async getEventsByCategory(category: string): Promise<Event[]> {
-    return this.request<Event[]>(`/events/category/${encodeURIComponent(category)}`);
+    const events = await this.getEvents();
+    return events.filter(
+      e => e.category?.trim().toLowerCase() === category.trim().toLowerCase()
+    );
   }
 
   async getEventsByOrganizer(email: string): Promise<Event[]> {
@@ -119,16 +135,25 @@ class ApiClient {
     return this.request<Event[]>(`/events/date/${dateYYYYMMDD}`);
   }
 
-  async getLocations(): Promise<string[]> {
-  return this.request<string[]>('/events/locations');
+  // Distinct lists computed client-side
+  async getCategories(): Promise<string[]> {
+    const events = await this.getEvents();
+    const categories = events
+      .map(e => e.category?.trim())
+      .filter((c): c is string => !!c && c.length > 0);
+    return Array.from(new Set(categories)).sort((a, b) =>
+      a.toLowerCase().localeCompare(b.toLowerCase())
+    );
   }
 
-  /**
-   * NEW: Get distinct categories from the backend
-   * Endpoint: GET /events/categories
-   */
-  async getCategories(): Promise<string[]> {
-    return this.request<string[]>('/events/categories');
+  async getLocations(): Promise<string[]> {
+    const events = await this.getEvents();
+    const locations = events
+      .map(e => e.location?.trim())
+      .filter((l): l is string => !!l && l.length > 0);
+    return Array.from(new Set(locations)).sort((a, b) =>
+      a.toLowerCase().localeCompare(b.toLowerCase())
+    );
   }
 
   // -------- Participants --------
