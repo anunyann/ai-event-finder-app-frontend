@@ -39,7 +39,7 @@ class ApiClient {
     try {
       const response = await fetch(url, { ...options, headers });
 
-      // Auth problems → kick to login
+      // Kick user back to login if JWT is missing/invalid/expired
       if (response.status === 401 || response.status === 422) {
         const errorData = await response.json().catch(() => ({}));
         const code = errorData?.error?.code;
@@ -93,7 +93,8 @@ class ApiClient {
   }
 
   async updateUser(updated: ProfileForm) {
-    return updated; // TODO: hook up when update route exists
+    // Placeholder until backend update route exists
+    return updated;
   }
 
   // -------- Events --------
@@ -157,23 +158,26 @@ class ApiClient {
   }
 
   // -------- Participants --------
-  async listParticipants(eventTitle: string): Promise<User[]> {
-    return this.request<User[]>(`/app/${encodeURIComponent(eventTitle)}/participants`);
+  async listParticipants(eventId: number): Promise<User[]> {
+    return this.request<User[]>(`/app/${eventId}/participants`);
   }
 
-  async addParticipant(eventTitle: string, userEmail: string): Promise<MessageResponse> {
+  async addParticipant(eventId: number, userEmail: string): Promise<MessageResponse> {
     return this.request<MessageResponse>(
-      `/app/${encodeURIComponent(eventTitle)}/participants/${encodeURIComponent(userEmail)}`,
+      `/app/${eventId}/participants/${encodeURIComponent(userEmail)}`,
       { method: 'POST' },
     );
   }
 
-  async removeParticipant(eventTitle: string, userEmail: string): Promise<MessageResponse> {
+  async removeParticipant(eventId: number, userEmail: string): Promise<MessageResponse> {
     return this.request<MessageResponse>(
-      `/app/${encodeURIComponent(eventTitle)}/participants/${encodeURIComponent(userEmail)}`,
+      `/app/${eventId}/participants/${encodeURIComponent(userEmail)}`,
       { method: 'DELETE' },
     );
   }
 }
 
+// Export both to cover all usage patterns
 export const apiClient = new ApiClient();
+export const api = apiClient;
+export default apiClient;

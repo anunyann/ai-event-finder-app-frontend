@@ -20,10 +20,11 @@ import { Separator } from '@/components/ui/separator';
 interface ParticipantsDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  eventTitle: string;
+  eventId: number; // switched from title → id
+  eventTitle: string; // still useful for display
 }
 
-export function ParticipantsDrawer({ open, onOpenChange, eventTitle }: ParticipantsDrawerProps) {
+export function ParticipantsDrawer({ open, onOpenChange, eventId, eventTitle }: ParticipantsDrawerProps) {
   const [participants, setParticipants] = useState<User[]>([]);
   const [newParticipantEmail, setNewParticipantEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -31,11 +32,11 @@ export function ParticipantsDrawer({ open, onOpenChange, eventTitle }: Participa
   const { toast } = useToast();
 
   const loadParticipants = async () => {
-    if (!eventTitle) return;
-    
+    if (!eventId) return;
+
     setIsLoading(true);
     try {
-      const data = await apiClient.listParticipants(eventTitle);
+      const data = await apiClient.listParticipants(eventId);
       setParticipants(data);
     } catch (error: any) {
       toast({
@@ -49,10 +50,10 @@ export function ParticipantsDrawer({ open, onOpenChange, eventTitle }: Participa
   };
 
   useEffect(() => {
-    if (open && eventTitle) {
+    if (open && eventId) {
       loadParticipants();
     }
-  }, [open, eventTitle]);
+  }, [open, eventId]);
 
   const handleAddParticipant = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,15 +61,15 @@ export function ParticipantsDrawer({ open, onOpenChange, eventTitle }: Participa
 
     setIsAdding(true);
     try {
-      await apiClient.addParticipant(eventTitle, newParticipantEmail);
+      await apiClient.addParticipant(eventId, newParticipantEmail);
       toast({
         title: 'Participant added',
         description: `${newParticipantEmail} has been added to the event`,
         className: 'bg-success text-success-foreground',
       });
-      
+
       setNewParticipantEmail('');
-      await loadParticipants(); // Refresh the list
+      await loadParticipants();
     } catch (error: any) {
       toast({
         title: 'Error adding participant',
@@ -82,14 +83,14 @@ export function ParticipantsDrawer({ open, onOpenChange, eventTitle }: Participa
 
   const handleRemoveParticipant = async (userEmail: string, userName: string) => {
     try {
-      await apiClient.removeParticipant(eventTitle, userEmail);
+      await apiClient.removeParticipant(eventId, userEmail);
       toast({
         title: 'Participant removed',
         description: `${userName} has been removed from the event`,
         className: 'bg-success text-success-foreground',
       });
-      
-      await loadParticipants(); // Refresh the list
+
+      await loadParticipants();
     } catch (error: any) {
       toast({
         title: 'Error removing participant',
