@@ -6,12 +6,13 @@ import { Badge } from '@/components/ui/badge';
 
 interface EventCardProps {
   event: Event;
-  onViewDetails?: () => void;
   onManageParticipants?: () => void;
+  onUserClick?: (email:string) => void;
 }
 
-export function EventCard({ event, onViewDetails, onManageParticipants }: EventCardProps) {
-  return (
+export function EventCard({ event, onManageParticipants, onUserClick }: EventCardProps) {
+    const organizerEmail = event.organizer.email;
+    return (
     <div className="glass-card-hover p-6 group">
       <div className="flex flex-col h-full">
         {/* Header */}
@@ -32,19 +33,21 @@ export function EventCard({ event, onViewDetails, onManageParticipants }: EventC
             <Calendar className="h-4 w-4 mr-3 flex-shrink-0" />
             <span>{formatEventDateTime(event.datetime)}</span>
           </div>
-          
+
           <div className="flex items-center text-sm text-muted-foreground">
             <MapPin className="h-4 w-4 mr-3 flex-shrink-0" />
             <span className="line-clamp-1">{event.location}</span>
           </div>
-          
+
           {event.organizer && (
             <div className="flex items-center text-sm text-muted-foreground">
               <User className="h-4 w-4 mr-3 flex-shrink-0" />
-              <span>{event.organizer.name} {event.organizer.surname}</span>
+              <span onClick={()=>{
+                  //console.log(organizerEmail);
+                  onUserClick(organizerEmail)}}>{event.organizer.name} {event.organizer.surname}</span>
             </div>
           )}
-          
+
           {event.guests && event.guests.length > 0 && (
             <div className="flex items-center text-sm text-muted-foreground">
               <Users className="h-4 w-4 mr-3 flex-shrink-0" />
@@ -64,8 +67,8 @@ export function EventCard({ event, onViewDetails, onManageParticipants }: EventC
 
         {/* Actions */}
         <div className="flex items-center justify-between pt-4 border-t border-border">
-          
-          
+
+
           <Button
             variant="outline"
             size="sm"
