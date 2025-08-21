@@ -76,6 +76,7 @@ class ApiClient {
     });
   }
 
+
   async getUsers(): Promise<User[]> {
     return this.request<User[]>('/users');
   }
@@ -110,6 +111,10 @@ class ApiClient {
 
   async getEventsByDate(dateYYYYMMDD: string): Promise<Event[]> {
     return this.request<Event[]>(`/events/date/${dateYYYYMMDD}`);
+  }
+
+  async getLocations(): Promise<string[]> {
+  return this.request<string[]>('/events/locations');
   }
 
   /**
