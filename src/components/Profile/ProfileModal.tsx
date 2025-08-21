@@ -1,34 +1,39 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-Dialog,
-DialogContent,
-DialogHeader,
-DialogTitle,
-DialogDescription,
-DialogFooter,
-} from "@/components/ui/dialog";
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogFooter,
+} from "../UI/dialog";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/hooks/useAuth";
-import { apiClient } from "../../api"; // adjust import path to your ApiClient
-import { ProfileForm, User } from "@/types";
+import { apiClient } from "../../api";
+import { ProfileForm, User, Event } from "@/types";
+import { EventCard } from "@/components/Events/EventCard";
 
 export default function ProfileModal({
-    open,
-    onOpenChange,
-    onSaved,
-}:{
+                                         open,
+                                         onOpenChange,
+                                         onSaved,
+                                         targetEmail
+                                     }:{
     open: boolean;
     onOpenChange: (open: boolean) => void;
     onSaved?: (data: ProfileForm) => void;
+    targetEmail?: string;
 }) {
-    const { user } = useAuth();
-    const [currentUser, setCurrentUser] = useState<User>(user)
+    const { user: authUser } = useAuth();
+    const [profileUser, setProfileUser] = useState<User | null>(null)
     const [editMode, setEditMode] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null >(null);
+    const [organizedEvents, setOrganizedEvents] = useState<Event[]>([]);
+    const [loadingEvents, setLoadingEvents] = useState(false);
 
     const [form, setForm] = useState<ProfileForm>({
         name: "",
@@ -37,16 +42,65 @@ export default function ProfileModal({
         password: ""
     });
 
+    const isSelf = useMemo(()=>{
+        const myEmail = authUser?.email;
+        const target = targetEmail ? targetEmail : authUser?.email;
+        return myEmail && target && myEmail === target;
+    }, [authUser, targetEmail]);
+
+    useEffect(() => {
+        if (!open) return;
+
+        const emailToLoad = (targetEmail ?? authUser?.email ?? "").toLowerCase();
+        if (!emailToLoad) return;
+
+        let cancelled = false;
+        setLoading(true);
+        setError(null);
+
+        (async () => {
+            try {
+                // EXISTING: load the displayed user
+                const u = await apiClient.getUserByEmail(emailToLoad); // GET /users/email/:email
+                if (cancelled) return;
+
+                setForm({
+                    name: u.name ?? "",
+                    surname: u.surname ?? "",
+                    email: u.email ?? "",
+                    password: "",
+                });
+                setEditMode(false);
+
+                // NEW: load all events organized by this user
+                setLoadingEvents(true);
+                const evts = await apiClient.getEventsByOrganizer(emailToLoad);
+                if (!cancelled) {
+                    setOrganizedEvents(evts ?? []);
+                }
+            } catch (e: any) {
+                if (!cancelled) setError(e?.message || "Failed to load profile");
+            } finally {
+                if (!cancelled) {
+                    setLoading(false);
+                    setLoadingEvents(false); // NEW
+                }
+            }
+        })();
+
+        return () => { cancelled = true; };
+    }, [open, targetEmail, authUser?.email]);
+
     useEffect(()=>{
         setForm({
-            name: (user as any).name ?? "",
-            surname: (user as any).surname ?? "",
-            email: user.email ?? "",
+            name: (authUser as any).name ?? "",
+            surname: (authUser as any).surname ?? "",
+            email: authUser.email ?? "",
             password: "",
         });
         setEditMode(false)
         setError(null)
-    }, [open, user]);
+    }, [open, authUser]);
 
     const canSave = useMemo(()=>{
         if(!editMode) return false;
@@ -54,42 +108,27 @@ export default function ProfileModal({
     }, [editMode, form.email]);
 
     const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement>
+        e: React.ChangeEvent<HTMLInputElement>
     ) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+        const { name, value } = e.target;
+        setForm((prev) => ({ ...prev, [name]: value }));
     }
 
     const handleSave = async () => {
-        if (!user) return;
+        if (!authUser) return;
         setLoading(true);
         setError(null);
         try {
-            // —— Choose one of the following server strategies ——
-            // 1) PATCH /users/me (recommended) — backend resolves from JWT
-            // const updated = await apiClient.updateMe({
-            // name: form.name,
-            // surname: form.surname,
-            // email: form.email,
-            // password: form.password || undefined,
-            // });
-
-
-            // 2) PATCH /users/email/:email — using the previous email as identifier
-            // (works with your current getUserByEmail style)
-            const identifierEmail = (user.email || form.email).toLowerCase();
+            const identifierEmail = (authUser.email || form.email).toLowerCase();
             const payload: ProfileForm = {
                 name: form.name,
                 surname: form.surname,
                 email: form.email,
             };
             if (form.password && form.password.trim().length > 0) {
-            payload.password = form.password;
+                payload.password = form.password;
             }
 
-
-            // You may already have an update endpoint; if not, create it server-side.
-            // Here we assume PATCH /users/email/:email
             const updated = await apiClient.updateUser(payload)
             if(updated){
                 localStorage.setItem('user', JSON.stringify(updated))
@@ -98,22 +137,24 @@ export default function ProfileModal({
             setEditMode(false);
             onOpenChange(false);
         } catch (e: any) {
-        const message = e?.message || e?.error?.message || "Failed to update profile";
-        setError(message);
+            const message = e?.message || e?.error?.message || "Failed to update profile";
+            setError(message);
         } finally {
-        setLoading(false);
+            setLoading(false);
         }
-        };
-        
+    };
+
     return(
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-lg glass-card border border-card-border">
+            {/* FIXED: Removed max-w-lg constraint and changed to sm:max-w-4xl */}
+            <DialogContent className="sm:max-w-4xl w-[95vw] h-fit overflow-hidden glass-card border border-card-border flex flex-col">
                 <DialogHeader>
                     <DialogTitle>Profile</DialogTitle>
                     <DialogDescription>
                         View your account details. Click Edit profile to update your info.
                     </DialogDescription>
                 </DialogHeader>
+
                 {/* Read only summary */}
                 {!editMode && (
                     <div className="space-y-3">
@@ -132,18 +173,18 @@ export default function ProfileModal({
                             </div>
                         </div>
                         <Separator className="my-2"/>
-                        <div className="flex justify-end">
+                        {isSelf && (<div className="flex justify-end">
                             <Button onClick={()=>setEditMode(true)}>Edit profile</Button>
-                        </div>
+                        </div>)}
                     </div>
                 )}
 
                 {editMode && (
                     <div className="space-y-4">
                         {error && (
-                         <div className="text-sm text-destructive bg-destructive/10 rounded-md p-2">
-                            {error}
-                         </div>   
+                            <div className="text-sm text-destructive bg-destructive/10 rounded-md p-2">
+                                {error}
+                            </div>
                         )}
 
                         <div className="grid grid-cols-2 gap-4">
@@ -181,7 +222,6 @@ export default function ProfileModal({
                             />
                         </div>
 
-
                         <div className="space-y-2">
                             <Label htmlFor="password">New password (optional)</Label>
                             <Input
@@ -203,13 +243,40 @@ export default function ProfileModal({
                                 {loading ? "Saving..." : "Save changes"}
                             </Button>
                         </DialogFooter>
-
                     </div>
-
                 )}
- 
+
+
+                {/* FIXED: Working horizontal scroll section */}
+                <div className="space-y-2">
+                    <Label className="text-muted-foreground">Organized events</Label>
+
+                    {loadingEvents ? (
+                        <p className="text-sm text-muted-foreground">Loading events…</p>
+                    ) : organizedEvents.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">No events found for this user.</p>
+                    ) : (
+                        <div className="w-full -mx-6">
+                            <div
+                                className="overflow-x-auto px-6 pb-2"
+                                style={{
+                                    scrollbarWidth: 'thin',
+                                    scrollbarColor: '#cbd5e1 transparent'
+                                }}
+                            >
+                                <div className="flex gap-4 w-max">
+                                    {organizedEvents.map((evt) => (
+                                        <div key={evt.id} className="flex-shrink-0 w-80 h-349">
+                                            <EventCard event={evt} onManageParticipants={undefined} />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
             </DialogContent>
         </Dialog>
-        );
-    
+    );
+
 }
