@@ -4,6 +4,13 @@ export type User = {
   email: string;
 };
 
+export type ProfileForm = {
+    name: string;
+    surname: string;
+    email: string;
+    password?: string;
+}
+
 export type Event = {
   title: string;
   description: string;

@@ -11,10 +11,13 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { ThemeToggle } from './ThemeToggle';
 import { useAuth } from '@/hooks/useAuth';
+import ProfileModal from '../Profile/ProfileModal';
+import { useState } from 'react';
 
 export function Topbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [profileOpen, setProfileOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -33,7 +36,7 @@ export function Topbar() {
         <div className="flex items-center space-x-6">
           <Link to="/" className="flex items-center space-x-2 group">
             <div className="w-8 h-8 gradient-primary rounded-lg flex items-center justify-center">
-              <MessageSquare className="h-5 w-5 text-white" />
+              <img src="../../../public/favicon.ico"></img>
             </div>
             <span className="text-xl font-bold text-gradient">
               AI Event Finder
@@ -86,6 +89,9 @@ export function Topbar() {
                   <p className="font-medium text-sm">
                     {user?.email || 'User'}
                   </p>
+                  <Button onClick={()=>{setProfileOpen(true)}} className="btn btn-blue">
+                    View profile
+                  </Button>
                 </div>
               </div>
               <DropdownMenuSeparator />
@@ -97,6 +103,11 @@ export function Topbar() {
           </DropdownMenu>
         </div>
       </div>
+      <ProfileModal 
+      open={profileOpen}
+      onOpenChange={setProfileOpen}
+      onSaved={()=>{}}
+      />
     </header>
   );
 }

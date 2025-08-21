@@ -3,7 +3,10 @@ import { apiClient } from '../api';
 
 export interface AuthState {
   token: string | null;
-  user: { email: string } | null;
+  user: { email: string,
+    name: string,
+    surname: string
+   } | null;
   loading: boolean;
 }
 
@@ -19,14 +22,16 @@ export function useAuth() {
     
     try {
       const response = await apiClient.login(email, password);
-      const user = { email };
       
       localStorage.setItem('token', response.access_token);
-      localStorage.setItem('user', JSON.stringify(user));
+
+      const profile = await apiClient.getUserByEmail(email);
+
+      localStorage.setItem('user', JSON.stringify(profile));
       
       setAuthState({
         token: response.access_token,
-        user,
+        user:profile,
         loading: false,
       });
       
