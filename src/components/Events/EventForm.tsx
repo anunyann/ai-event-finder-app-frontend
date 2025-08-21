@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -6,6 +6,7 @@ import { CalendarIcon, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { formatToApiDateTime } from '@/lib/format';
+import { apiClient } from '@/api';
 
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -42,7 +43,10 @@ import {
 
 const eventSchema = z.object({
   title: z.string().min(1, 'Title is required').max(200, 'Title too long'),
-  description: z.string().min(1, 'Description is required').max(1000, 'Description too long'),
+  description: z
+    .string()
+    .min(1, 'Description is required')
+    .max(1000, 'Description too long'),
   datetime: z.date({ required_error: 'Date and time are required' }),
   location: z.string().min(1, 'Location is required').max(200, 'Location too long'),
   category: z.string().min(1, 'Category is required'),
@@ -65,22 +69,10 @@ interface EventFormProps {
   isLoading?: boolean;
 }
 
-const categories = [
-  'Technology',
-  'Business',
-  'Arts & Culture',
-  'Sports & Fitness',
-  'Food & Drink',
-  'Music',
-  'Education',
-  'Health & Wellness',
-  'Community',
-  'Other',
-];
-
 export function EventForm({ open, onOpenChange, onSubmit, isLoading }: EventFormProps) {
   const [timeValue, setTimeValue] = useState('18:00');
-  
+  const [categories, setCategories] = useState<string[]>([]);
+
   const form = useForm<EventFormData>({
     resolver: zodResolver(eventSchema),
     defaultValues: {
@@ -91,6 +83,17 @@ export function EventForm({ open, onOpenChange, onSubmit, isLoading }: EventForm
       organizer_email: '',
     },
   });
+
+  // fetch distinct categories dynamically from events
+  useEffect(() => {
+    apiClient
+      .getCategories()
+      .then(setCategories)
+      .catch((err) => {
+        console.error('Failed to fetch categories:', err);
+        setCategories([]); // fallback to empty
+      });
+  }, []);
 
   const handleSubmit = async (data: EventFormData) => {
     // Combine date and time
@@ -108,7 +111,7 @@ export function EventForm({ open, onOpenChange, onSubmit, isLoading }: EventForm
     };
 
     await onSubmit(formattedData);
-    
+
     // Reset form on success
     form.reset();
     setTimeValue('18:00');
@@ -244,11 +247,17 @@ export function EventForm({ open, onOpenChange, onSubmit, isLoading }: EventForm
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent className="glass-card">
-                          {categories.map((category) => (
-                            <SelectItem key={category} value={category}>
-                              {category}
-                            </SelectItem>
-                          ))}
+                          {categories.length > 0 ? (
+                            categories.map((category) => (
+                              <SelectItem key={category} value={category}>
+                                {category}
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <div className="p-2 text-sm text-muted-foreground">
+                              No categories available
+                            </div>
+                          )}
                         </SelectContent>
                       </Select>
                       <FormMessage />
