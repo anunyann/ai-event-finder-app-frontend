@@ -30,28 +30,15 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-const categories = [
-  'All Categories',
-  'Technology',
-  'Business',
-  'Arts & Culture',
-  'Sports & Fitness',
-  'Food & Drink',
-  'Music',
-  'Education',
-  'Health & Wellness',
-  'Community',
-  'Other',
-];
-
 export default function Events() {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
   const [events, setEvents] = useState<Event[]>([]);
   const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
   const [createFormOpen, setCreateFormOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [participantsDrawerOpen, setParticipantsDrawerOpen] = useState(false);
@@ -61,6 +48,10 @@ export default function Events() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All Categories');
   const [selectedLocation, setSelectedLocation] = useState('');
+
+  // Dynamic categories from backend
+  const [categories, setCategories] = useState<string[]>(['All Categories']);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(false);
 
   // Redirect to login if not authenticated
   if (!isAuthenticated) {
@@ -85,8 +76,30 @@ export default function Events() {
     }
   };
 
+  const loadCategories = async () => {
+    setIsLoadingCategories(true);
+    try {
+      const data = await apiClient.getCategories();
+      // ensure uniqueness, trim, and prepend "All Categories"
+      const cleaned = Array.from(
+        new Set((data || []).map(c => (c ?? '').trim()).filter(Boolean))
+      );
+      setCategories(['All Categories', ...cleaned]);
+    } catch (error: any) {
+      // Keep default "All Categories" only if it fails
+      toast({
+        title: 'Error loading categories',
+        description: error.message || 'Failed to load categories',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoadingCategories(false);
+    }
+  };
+
   useEffect(() => {
     loadEvents();
+    loadCategories();
   }, []);
 
   // Apply filters
@@ -128,9 +141,10 @@ export default function Events() {
         description: `"${eventData.title}" has been created`,
         className: 'bg-success text-success-foreground',
       });
-      
+
       setCreateFormOpen(false);
       await loadEvents(); // Refresh the list
+      await loadCategories(); // In case a new category was introduced
     } catch (error: any) {
       toast({
         title: 'Error creating event',
@@ -158,7 +172,7 @@ export default function Events() {
   return (
     <div className="min-h-screen bg-background">
       <Topbar />
-      
+
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8">
@@ -168,7 +182,7 @@ export default function Events() {
               Discover and manage events in your community
             </p>
           </div>
-          
+
           <Button
             onClick={() => setCreateFormOpen(true)}
             className="gradient-primary hover:opacity-90 mt-4 lg:mt-0"
@@ -196,7 +210,7 @@ export default function Events() {
             <Select value={selectedCategory} onValueChange={setSelectedCategory}>
               <SelectTrigger className="w-[200px]">
                 <Tag className="h-4 w-4 mr-2" />
-                <SelectValue />
+                <SelectValue placeholder={isLoadingCategories ? 'Loading...' : selectedCategory} />
               </SelectTrigger>
               <SelectContent className="glass-card">
                 {categories.map((category) => (
@@ -272,7 +286,7 @@ export default function Events() {
             <Calendar className="h-16 w-16 text-muted-foreground mx-auto mb-6" />
             <h3 className="text-lg font-semibold mb-2">No events found</h3>
             <p className="text-muted-foreground mb-6">
-              {events.length === 0 
+              {events.length === 0
                 ? "There are no events yet. Create the first one!"
                 : "No events match your current filters. Try adjusting your search criteria."
               }

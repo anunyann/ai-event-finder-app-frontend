@@ -1,6 +1,6 @@
 import { User, Event, CreateEventPayload, AuthResponse, MessageResponse, ApiError, ProfileForm } from './types';
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+const BASE_URL = '/api'
 
 class ApiClient {
   private getToken(): string | null {
@@ -13,7 +13,6 @@ class ApiClient {
   }
 
   private redirectToLogin(): void {
-    // Clear auth state and redirect
     this.clearToken();
     window.location.href = '/login';
   }
@@ -21,28 +20,22 @@ class ApiClient {
   private async request<T>(path: string, options: RequestInit = {}): Promise<T> {
     const url = `${BASE_URL}${path}`;
     const token = this.getToken();
-    
+
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       ...(options.headers as Record<string, string>),
     };
 
-    if (token) {
-      headers.Authorization = `Bearer ${token}`;
-    }
+    if (token) headers.Authorization = `Bearer ${token}`;
 
     try {
-      const response = await fetch(url, {
-        ...options,
-        headers,
-      });
+      const response = await fetch(url, { ...options, headers });
 
-      // Handle authentication errors
+      // Auth problems → kick to login
       if (response.status === 401 || response.status === 422) {
         const errorData = await response.json().catch(() => ({}));
-        const errorCode = errorData?.error?.code;
-        
-        if (errorCode && ['JWT_MISSING', 'JWT_INVALID', 'JWT_EXPIRED'].includes(errorCode)) {
+        const code = errorData?.error?.code;
+        if (code && ['JWT_MISSING', 'JWT_INVALID', 'JWT_EXPIRED'].includes(code)) {
           this.redirectToLogin();
           throw new Error('Authentication failed');
         }
@@ -50,20 +43,18 @@ class ApiClient {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        const error = errorData?.error || { code: 'UNKNOWN_ERROR', message: 'Request failed' };
+        const error: ApiError = errorData?.error || { code: 'UNKNOWN_ERROR', message: 'Request failed' };
         throw error;
       }
 
-      return await response.json();
+      return (await response.json()) as T;
     } catch (error) {
-      if (error instanceof Error) {
-        throw error;
-      }
-      throw { code: 'NETWORK_ERROR', message: 'Network request failed' };
+      if (error instanceof Error) throw error;
+      throw { code: 'NETWORK_ERROR', message: 'Network request failed' } as ApiError;
     }
   }
 
-  // Auth
+  // -------- Auth --------
   async login(email: string, password: string): Promise<AuthResponse> {
     return this.request<AuthResponse>('/auth/login', {
       method: 'POST',
@@ -71,13 +62,13 @@ class ApiClient {
     });
   }
 
-  // Chat
+  // -------- Chat --------
   async queryPrompt(prompt: string): Promise<any> {
     const encodedPrompt = encodeURIComponent(prompt);
     return this.request<any>(`/app/prompt?prompt=${encodedPrompt}`);
   }
 
-  // Users
+  // -------- Users --------
   async createUser(user: { name: string; surname: string; email: string; password: string }): Promise<User> {
     return this.request<User>('/users', {
       method: 'POST',
@@ -96,7 +87,7 @@ class ApiClient {
   }
     
 
-  // Events
+  // -------- Events --------
   async getEvents(): Promise<Event[]> {
     return this.request<Event[]>('/events');
   }
@@ -128,21 +119,31 @@ class ApiClient {
     return this.request<Event[]>(`/events/date/${dateYYYYMMDD}`);
   }
 
-  // Participants
+  /**
+   * NEW: Get distinct categories from the backend
+   * Endpoint: GET /events/categories
+   */
+  async getCategories(): Promise<string[]> {
+    return this.request<string[]>('/events/categories');
+  }
+
+  // -------- Participants --------
   async listParticipants(eventTitle: string): Promise<User[]> {
     return this.request<User[]>(`/app/${encodeURIComponent(eventTitle)}/participants`);
   }
 
   async addParticipant(eventTitle: string, userEmail: string): Promise<MessageResponse> {
-    return this.request<MessageResponse>(`/app/${encodeURIComponent(eventTitle)}/participants/${encodeURIComponent(userEmail)}`, {
-      method: 'POST',
-    });
+    return this.request<MessageResponse>(
+      `/app/${encodeURIComponent(eventTitle)}/participants/${encodeURIComponent(userEmail)}`,
+      { method: 'POST' },
+    );
   }
 
   async removeParticipant(eventTitle: string, userEmail: string): Promise<MessageResponse> {
-    return this.request<MessageResponse>(`/app/${encodeURIComponent(eventTitle)}/participants/${encodeURIComponent(userEmail)}`, {
-      method: 'DELETE',
-    });
+    return this.request<MessageResponse>(
+      `/app/${encodeURIComponent(eventTitle)}/participants/${encodeURIComponent(userEmail)}`,
+      { method: 'DELETE' },
+    );
   }
 }
 
