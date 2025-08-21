@@ -12,6 +12,7 @@ export type ProfileForm = {
 }
 
 export type Event = {
+  id: number;
   title: string;
   description: string;
   datetime: string;            // ISO-like string from API; format for display

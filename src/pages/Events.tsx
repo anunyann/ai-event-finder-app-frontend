@@ -42,6 +42,7 @@ export default function Events() {
   const [createFormOpen, setCreateFormOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [participantsDrawerOpen, setParticipantsDrawerOpen] = useState(false);
+  const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
   const [selectedEventTitle, setSelectedEventTitle] = useState('');
 
   // Filters
@@ -156,10 +157,10 @@ export default function Events() {
     }
   };
 
-  const handleManageParticipants = (eventTitle: string) => {
-    setSelectedEventTitle(eventTitle);
-    setParticipantsDrawerOpen(true);
-  };
+  const handleManageParticipants = (event: Event) => {
+  setSelectedEventTitle(event.title);   // use title only
+  setParticipantsDrawerOpen(true);
+};
 
   const clearFilters = () => {
     setSearchQuery('');
@@ -305,9 +306,9 @@ export default function Events() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredEvents.map((event) => (
               <EventCard
-                key={event.title}
+                key={event.id}
                 event={event}
-                onManageParticipants={() => handleManageParticipants(event.title)}
+                onManageParticipants={() => handleManageParticipants(event)}
               />
             ))}
           </div>
@@ -324,10 +325,10 @@ export default function Events() {
 
       {/* Participants Drawer */}
       <ParticipantsDrawer
-        open={participantsDrawerOpen}
-        onOpenChange={setParticipantsDrawerOpen}
-        eventTitle={selectedEventTitle}
-      />
+  open={participantsDrawerOpen}
+  onOpenChange={setParticipantsDrawerOpen}
+  eventTitle={selectedEventTitle}
+/>
     </div>
   );
 }

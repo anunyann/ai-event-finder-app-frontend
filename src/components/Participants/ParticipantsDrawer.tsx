@@ -20,11 +20,10 @@ import { Separator } from '@/components/ui/separator';
 interface ParticipantsDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  eventId: number; // switched from title → id
-  eventTitle: string; // still useful for display
+  eventTitle: string;
 }
 
-export function ParticipantsDrawer({ open, onOpenChange, eventId, eventTitle }: ParticipantsDrawerProps) {
+export function ParticipantsDrawer({ open, onOpenChange, eventTitle }: ParticipantsDrawerProps) {
   const [participants, setParticipants] = useState<User[]>([]);
   const [newParticipantEmail, setNewParticipantEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -32,11 +31,10 @@ export function ParticipantsDrawer({ open, onOpenChange, eventId, eventTitle }: 
   const { toast } = useToast();
 
   const loadParticipants = async () => {
-    if (!eventId) return;
-
+    if (!eventTitle) return;
     setIsLoading(true);
     try {
-      const data = await apiClient.listParticipants(eventId);
+      const data = await apiClient.listParticipants(eventTitle);
       setParticipants(data);
     } catch (error: any) {
       toast({
@@ -50,24 +48,20 @@ export function ParticipantsDrawer({ open, onOpenChange, eventId, eventTitle }: 
   };
 
   useEffect(() => {
-    if (open && eventId) {
-      loadParticipants();
-    }
-  }, [open, eventId]);
+    if (open && eventTitle) loadParticipants();
+  }, [open, eventTitle]);
 
   const handleAddParticipant = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newParticipantEmail.trim() || isAdding) return;
-
     setIsAdding(true);
     try {
-      await apiClient.addParticipant(eventId, newParticipantEmail);
+      await apiClient.addParticipant(eventTitle, newParticipantEmail); // ✅ uses title
       toast({
         title: 'Participant added',
         description: `${newParticipantEmail} has been added to the event`,
         className: 'bg-success text-success-foreground',
       });
-
       setNewParticipantEmail('');
       await loadParticipants();
     } catch (error: any) {
@@ -83,13 +77,12 @@ export function ParticipantsDrawer({ open, onOpenChange, eventId, eventTitle }: 
 
   const handleRemoveParticipant = async (userEmail: string, userName: string) => {
     try {
-      await apiClient.removeParticipant(eventId, userEmail);
+      await apiClient.removeParticipant(eventTitle, userEmail); // uses title
       toast({
         title: 'Participant removed',
         description: `${userName} has been removed from the event`,
         className: 'bg-success text-success-foreground',
       });
-
       await loadParticipants();
     } catch (error: any) {
       toast({
@@ -149,9 +142,7 @@ export function ParticipantsDrawer({ open, onOpenChange, eventId, eventTitle }: 
           {/* Participants List */}
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-medium">
-                Current Participants
-              </h3>
+              <h3 className="text-sm font-medium">Current Participants</h3>
               <Badge variant="secondary">
                 {participants.length} participant{participants.length !== 1 ? 's' : ''}
               </Badge>
@@ -164,9 +155,7 @@ export function ParticipantsDrawer({ open, onOpenChange, eventId, eventTitle }: 
             ) : participants.length === 0 ? (
               <div className="text-center py-8">
                 <UserIcon className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-sm text-muted-foreground">
-                  No participants yet
-                </p>
+                <p className="text-sm text-muted-foreground">No participants yet</p>
                 <p className="text-xs text-muted-foreground mt-1">
                   Add someone using the form above
                 </p>
@@ -186,9 +175,7 @@ export function ParticipantsDrawer({ open, onOpenChange, eventId, eventTitle }: 
                         <p className="text-sm font-medium">
                           {participant.name} {participant.surname}
                         </p>
-                        <p className="text-xs text-muted-foreground">
-                          {participant.email}
-                        </p>
+                        <p className="text-xs text-muted-foreground">{participant.email}</p>
                       </div>
                     </div>
                     <Button

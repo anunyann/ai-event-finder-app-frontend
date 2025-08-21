@@ -5,7 +5,7 @@ import {
   AuthResponse,
   MessageResponse,
   ApiError,
-  ProfileForm
+  ProfileForm,
 } from './types';
 
 const BASE_URL = '/api';
@@ -33,7 +33,6 @@ class ApiClient {
       'Content-Type': 'application/json',
       ...(options.headers as Record<string, string>),
     };
-
     if (token) headers.Authorization = `Bearer ${token}`;
 
     try {
@@ -51,7 +50,8 @@ class ApiClient {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        const error: ApiError = errorData?.error || { code: 'UNKNOWN_ERROR', message: 'Request failed' };
+        const error: ApiError =
+          errorData?.error || { code: 'UNKNOWN_ERROR', message: 'Request failed' };
         throw error;
       }
 
@@ -77,7 +77,12 @@ class ApiClient {
   }
 
   // -------- Users --------
-  async createUser(user: { name: string; surname: string; email: string; password: string }): Promise<User> {
+  async createUser(user: {
+    name: string;
+    surname: string;
+    email: string;
+    password: string;
+  }): Promise<User> {
     return this.request<User>('/users', {
       method: 'POST',
       body: JSON.stringify(user),
@@ -113,21 +118,6 @@ class ApiClient {
     return this.request<Event>(`/events/title/${encodeURIComponent(title)}`);
   }
 
-  // Frontend filtering instead of backend endpoints
-  async getEventsByLocation(location: string): Promise<Event[]> {
-    const events = await this.getEvents();
-    return events.filter(
-      e => e.location?.trim().toLowerCase() === location.trim().toLowerCase()
-    );
-  }
-
-  async getEventsByCategory(category: string): Promise<Event[]> {
-    const events = await this.getEvents();
-    return events.filter(
-      e => e.category?.trim().toLowerCase() === category.trim().toLowerCase()
-    );
-  }
-
   async getEventsByOrganizer(email: string): Promise<Event[]> {
     return this.request<Event[]>(`/events/organizer/${encodeURIComponent(email)}`);
   }
@@ -140,7 +130,7 @@ class ApiClient {
   async getCategories(): Promise<string[]> {
     const events = await this.getEvents();
     const categories = events
-      .map(e => e.category?.trim())
+      .map((e) => e.category?.trim())
       .filter((c): c is string => !!c && c.length > 0);
     return Array.from(new Set(categories)).sort((a, b) =>
       a.toLowerCase().localeCompare(b.toLowerCase())
@@ -150,7 +140,7 @@ class ApiClient {
   async getLocations(): Promise<string[]> {
     const events = await this.getEvents();
     const locations = events
-      .map(e => e.location?.trim())
+      .map((l) => l.location?.trim())
       .filter((l): l is string => !!l && l.length > 0);
     return Array.from(new Set(locations)).sort((a, b) =>
       a.toLowerCase().localeCompare(b.toLowerCase())
@@ -158,26 +148,27 @@ class ApiClient {
   }
 
   // -------- Participants --------
-  async listParticipants(eventId: number): Promise<User[]> {
-    return this.request<User[]>(`/app/${eventId}/participants`);
-  }
-
-  async addParticipant(eventId: number, userEmail: string): Promise<MessageResponse> {
-    return this.request<MessageResponse>(
-      `/app/${eventId}/participants/${encodeURIComponent(userEmail)}`,
-      { method: 'POST' },
-    );
-  }
-
-  async removeParticipant(eventId: number, userEmail: string): Promise<MessageResponse> {
-    return this.request<MessageResponse>(
-      `/app/${eventId}/participants/${encodeURIComponent(userEmail)}`,
-      { method: 'DELETE' },
-    );
-  }
+  // -------- Participants --------
+async listParticipants(eventTitle: string): Promise<User[]> {
+  return this.request<User[]>(`/app/${encodeURIComponent(eventTitle)}/participants`);
 }
 
-// Export both to cover all usage patterns
+async addParticipant(eventTitle: string, userEmail: string): Promise<MessageResponse> {
+  return this.request<MessageResponse>(
+    `/app/${encodeURIComponent(eventTitle)}/participants/${encodeURIComponent(userEmail)}`,
+    { method: 'POST' },
+  );
+}
+
+async removeParticipant(eventTitle: string, userEmail: string): Promise<MessageResponse> {
+  return this.request<MessageResponse>(
+    `/app/${encodeURIComponent(eventTitle)}/participants/${encodeURIComponent(userEmail)}`,
+    { method: 'DELETE' },
+  );
+}
+
+}
+
 export const apiClient = new ApiClient();
 export const api = apiClient;
 export default apiClient;
