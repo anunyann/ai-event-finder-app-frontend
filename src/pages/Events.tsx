@@ -29,6 +29,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import ProfileModal from "@/components/Profile/ProfileModal.tsx";
 
 export default function Events() {
   const { isAuthenticated } = useAuth();
@@ -54,6 +55,10 @@ export default function Events() {
   const [categories, setCategories] = useState<string[]>(['All Categories']);
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
 
+
+  // Profile modal state
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [targetEmail, setTargetEmail] = useState<string | undefined>();
   // Redirect to login if not authenticated
   if (!isAuthenticated) {
     navigate('/login');
@@ -306,9 +311,13 @@ export default function Events() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredEvents.map((event) => (
               <EventCard
-                key={event.id}
+                key={event.title}
                 event={event}
-                onManageParticipants={() => handleManageParticipants(event)}
+                onManageParticipants={() => handleManageParticipants(event.title)}
+                onUserClick={(email) => {
+                    setTargetEmail(email)
+                    setProfileOpen(true)
+                }}
               />
             ))}
           </div>
@@ -321,6 +330,13 @@ export default function Events() {
         onOpenChange={setCreateFormOpen}
         onSubmit={handleCreateEvent}
         isLoading={isCreating}
+      />
+
+      {/*User modal*/}
+      <ProfileModal
+          open={profileOpen}
+          onOpenChange={setProfileOpen}
+          targetEmail={targetEmail}
       />
 
       {/* Participants Drawer */}

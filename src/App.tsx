@@ -9,6 +9,7 @@ import Login from "./pages/Login";
 import Chat from "./pages/Chat";
 import Events from "./pages/Events";
 import NotFound from "./pages/NotFound";
+import ProfileModal from "@/components/Profile/ProfileModal.tsx";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +48,7 @@ const App = () => (
               </ProtectedRoute>
             } 
           />
+
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
