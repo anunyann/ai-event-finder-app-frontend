@@ -29,6 +29,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import ProfileModal from '@/components/Profile/ProfileModal.tsx';
 
 export default function Events() {
@@ -42,8 +52,25 @@ export default function Events() {
 
   const [createFormOpen, setCreateFormOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+
   const [participantsDrawerOpen, setParticipantsDrawerOpen] = useState(false);
   const [selectedEventTitle, setSelectedEventTitle] = useState('');
+
+  // --- Edit modal state ---
+  const [editOpen, setEditOpen] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [originalTitle, setOriginalTitle] = useState<string | null>(null);
+  const [editInitial, setEditInitial] = useState<{
+    title: string;
+    description: string;
+    datetime: Date | undefined;
+    location: string;
+    category: string;
+    organizer_email: string;
+  } | null>(null);
+
+  // --- Delete confirm state ---
+  const [deleteTarget, setDeleteTarget] = useState<Event | null>(null);
 
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
@@ -58,7 +85,6 @@ export default function Events() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [targetEmail, setTargetEmail] = useState<string | undefined>();
 
-  // Redirect to login if not authenticated
   if (!isAuthenticated) {
     navigate('/login');
     return null;
@@ -85,13 +111,9 @@ export default function Events() {
     setIsLoadingCategories(true);
     try {
       const data = await apiClient.getCategories();
-      // ensure uniqueness, trim, and prepend "All Categories"
-      const cleaned = Array.from(
-        new Set((data || []).map((c) => (c ?? '').trim()).filter(Boolean)),
-      );
+      const cleaned = Array.from(new Set((data || []).map((c) => (c ?? '').trim()).filter(Boolean)));
       setCategories(['All Categories', ...cleaned]);
     } catch (error: any) {
-      // Keep default "All Categories" only if it fails
       toast({
         title: 'Error loading categories',
         description: error.message || 'Failed to load categories',
@@ -111,7 +133,6 @@ export default function Events() {
   useEffect(() => {
     let filtered = events;
 
-    // Search filter
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(
@@ -122,12 +143,10 @@ export default function Events() {
       );
     }
 
-    // Category filter
     if (selectedCategory && selectedCategory !== 'All Categories') {
       filtered = filtered.filter((event) => event.category === selectedCategory);
     }
 
-    // Location filter
     if (selectedLocation.trim()) {
       const location = selectedLocation.toLowerCase();
       filtered = filtered.filter((event) => event.location.toLowerCase().includes(location));
@@ -145,10 +164,9 @@ export default function Events() {
         description: `"${eventData.title}" has been created`,
         className: 'bg-success text-success-foreground',
       });
-
       setCreateFormOpen(false);
-      await loadEvents(); // Refresh the list
-      await loadCategories(); // In case a new category was introduced
+      await loadEvents();
+      await loadCategories();
     } catch (error: any) {
       toast({
         title: 'Error creating event',
@@ -160,11 +178,92 @@ export default function Events() {
     }
   };
 
-  // ✅ Accept a title string, not an Event
   const handleManageParticipants = (title: string) => {
     setSelectedEventTitle(title);
     setParticipantsDrawerOpen(true);
   };
+
+  // --- open edit modal with prefilled values ---
+  const handleEdit = (event: Event) => {
+    setOriginalTitle(event.title);
+    setEditInitial({
+      title: event.title,
+      description: event.description ?? '',
+      datetime: event.datetime ? new Date(event.datetime) : undefined,
+      location: event.location ?? '',
+      category: event.category ?? '',
+      organizer_email: event.organizer?.email ?? '',
+    });
+    setEditOpen(true);
+  };
+
+  // --- save edit ---
+  const handleEditSubmit = async (data: {
+    title: string;
+    description: string;
+    datetime: string;
+    location: string;
+    category: string;
+    organizer_email: string;
+  }) => {
+    if (!originalTitle) return;
+    setIsUpdating(true);
+    try {
+      await apiClient.updateEvent(originalTitle, data);
+      toast({
+        title: 'Event updated',
+        description: `"${data.title}" has been saved`,
+        className: 'bg-success text-success-foreground',
+      });
+      setEditOpen(false);
+      await loadEvents();
+      await loadCategories();
+    } catch (error: any) {
+      toast({
+        title: 'Error updating event',
+        description: error.message || 'Failed to update event',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  // --- open delete dialog ---
+  const handleDelete = (event: Event) => {
+    setDeleteTarget(event);
+  };
+
+  // --- confirm delete action ---
+  const confirmDelete = async () => {
+  if (!deleteTarget) return;
+
+  // Optimistically remove from UI right away
+  const title = deleteTarget.title;
+  setEvents(prev => prev.filter(e => e.title !== title));
+  setFilteredEvents(prev => prev.filter(e => e.title !== title));
+  setDeleteTarget(null);
+
+  try {
+    await apiClient.deleteEvent(title);
+    toast({
+      title: 'Event deleted',
+      description: `“${title}” has been removed`,
+      className: 'bg-success text-success-foreground',
+    });
+    // Re-sync from server in the background
+    await loadEvents();
+    await loadCategories();
+  } catch (error: any) {
+    // If the delete fails, reload to revert optimistic UI
+    await loadEvents();
+    toast({
+      title: 'Error deleting event',
+      description: error.message || 'Failed to delete event',
+      variant: 'destructive',
+    });
+  }
+};
 
   const clearFilters = () => {
     setSearchQuery('');
@@ -241,7 +340,6 @@ export default function Events() {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* Clear Filters */}
             {(searchQuery || selectedCategory !== 'All Categories' || selectedLocation) && (
               <Button variant="ghost" onClick={clearFilters}>
                 Clear Filters
@@ -249,7 +347,6 @@ export default function Events() {
             )}
           </div>
 
-          {/* Filter Results Summary */}
           <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <span>
@@ -300,21 +397,34 @@ export default function Events() {
                 event={event}
                 onManageParticipants={() => handleManageParticipants(event.title)}
                 onUserClick={(email) => {
-                  setTargetEmail(email);
-                  setProfileOpen(true);
-                }}
+  setTargetEmail(email);
+  setProfileOpen(true);
+}}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
               />
             ))}
           </div>
         )}
       </div>
 
-      {/* Create Event Modal */}
+      {/* Create Modal */}
       <EventForm
         open={createFormOpen}
         onOpenChange={setCreateFormOpen}
         onSubmit={handleCreateEvent}
         isLoading={isCreating}
+        mode="create"
+      />
+
+      {/* Edit Modal */}
+      <EventForm
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        onSubmit={handleEditSubmit}
+        isLoading={isUpdating}
+        mode="edit"
+        initial={editInitial ?? undefined}
       />
 
       {/* User modal */}
@@ -326,6 +436,29 @@ export default function Events() {
         onOpenChange={setParticipantsDrawerOpen}
         eventTitle={selectedEventTitle}
       />
+
+      {/* Pretty Delete Confirmation */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent className="glass-card">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this event?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {deleteTarget
+                ? `“${deleteTarget.title}” will be permanently deleted. This cannot be undone.`
+                : ''}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

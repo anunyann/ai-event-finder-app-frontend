@@ -38,7 +38,7 @@ class ApiClient {
     try {
       const response = await fetch(url, { ...options, headers });
 
-      // Kick user back to login if JWT is missing/invalid/expired
+      // Handle auth errors the way your app expects
       if (response.status === 401 || response.status === 422) {
         const errorData = await response.json().catch(() => ({}));
         const code = errorData?.error?.code;
@@ -48,6 +48,7 @@ class ApiClient {
         }
       }
 
+      // On failure, try to read structured error
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         const error: ApiError =
@@ -55,6 +56,14 @@ class ApiClient {
         throw error;
       }
 
+      // SUCCESS: safely parse JSON only when present
+      if (response.status === 204) {
+        return undefined as unknown as T; // No Content
+      }
+      const contentType = response.headers.get('content-type') || '';
+      if (!contentType.includes('application/json')) {
+        return undefined as unknown as T; // non-JSON/empty success
+      }
       return (await response.json()) as T;
     } catch (error) {
       if (error instanceof Error) throw error;
@@ -133,7 +142,7 @@ class ApiClient {
       .map((e) => e.category?.trim())
       .filter((c): c is string => !!c && c.length > 0);
     return Array.from(new Set(categories)).sort((a, b) =>
-      a.toLowerCase().localeCompare(b.toLowerCase())
+      a.toLowerCase().localeCompare(b.toLowerCase()),
     );
   }
 
@@ -143,30 +152,53 @@ class ApiClient {
       .map((l) => l.location?.trim())
       .filter((l): l is string => !!l && l.length > 0);
     return Array.from(new Set(locations)).sort((a, b) =>
-      a.toLowerCase().localeCompare(b.toLowerCase())
+      a.toLowerCase().localeCompare(b.toLowerCase()),
     );
   }
 
   // -------- Participants --------
-  // -------- Participants --------
-async listParticipants(eventTitle: string): Promise<User[]> {
-  return this.request<User[]>(`/app/${encodeURIComponent(eventTitle)}/participants`);
-}
+  async listParticipants(eventTitle: string): Promise<User[]> {
+    return this.request<User[]>(`/app/${encodeURIComponent(eventTitle)}/participants`);
+  }
 
-async addParticipant(eventTitle: string, userEmail: string): Promise<MessageResponse> {
-  return this.request<MessageResponse>(
-    `/app/${encodeURIComponent(eventTitle)}/participants/${encodeURIComponent(userEmail)}`,
-    { method: 'POST' },
-  );
-}
+  async addParticipant(eventTitle: string, userEmail: string): Promise<MessageResponse> {
+    return this.request<MessageResponse>(
+      `/app/${encodeURIComponent(eventTitle)}/participants/${encodeURIComponent(userEmail)}`,
+      { method: 'POST' },
+    );
+  }
 
-async removeParticipant(eventTitle: string, userEmail: string): Promise<MessageResponse> {
-  return this.request<MessageResponse>(
-    `/app/${encodeURIComponent(eventTitle)}/participants/${encodeURIComponent(userEmail)}`,
-    { method: 'DELETE' },
-  );
-}
+  async removeParticipant(eventTitle: string, userEmail: string): Promise<MessageResponse> {
+    return this.request<MessageResponse>(
+      `/app/${encodeURIComponent(eventTitle)}/participants/${encodeURIComponent(userEmail)}`,
+      { method: 'DELETE' },
+    );
+  }
 
+  // -------- Event edit/delete --------
+  async updateEvent(
+    originalTitle: string,
+    payload: {
+      title: string;
+      description: string;
+      datetime: string;
+      location: string;
+      category: string;
+      organizer_email: string;
+    },
+  ): Promise<Event> {
+    return this.request<Event>(
+      `/events/title/${encodeURIComponent(originalTitle)}`,
+      { method: 'PUT', body: JSON.stringify(payload) },
+    );
+  }
+
+  async deleteEvent(title: string): Promise<void> {
+    await this.request<void>(
+      `/events/title/${encodeURIComponent(title)}`,
+      { method: 'DELETE' },
+    );
+  }
 }
 
 export const apiClient = new ApiClient();

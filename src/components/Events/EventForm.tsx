@@ -43,10 +43,7 @@ import {
 
 const eventSchema = z.object({
   title: z.string().min(1, 'Title is required').max(200, 'Title too long'),
-  description: z
-    .string()
-    .min(1, 'Description is required')
-    .max(1000, 'Description too long'),
+  description: z.string().min(1, 'Description is required').max(1000, 'Description too long'),
   datetime: z.date({ required_error: 'Date and time are required' }),
   location: z.string().min(1, 'Location is required').max(200, 'Location too long'),
   category: z.string().min(1, 'Category is required'),
@@ -67,36 +64,60 @@ interface EventFormProps {
     organizer_email: string;
   }) => Promise<void>;
   isLoading?: boolean;
+
+  // NEW
+  mode?: 'create' | 'edit';
+  initial?: Partial<{
+    title: string;
+    description: string;
+    datetime: Date;         // NOTE: as Date
+    location: string;
+    category: string;
+    organizer_email: string;
+  }>;
 }
 
-export function EventForm({ open, onOpenChange, onSubmit, isLoading }: EventFormProps) {
+export function EventForm({ open, onOpenChange, onSubmit, isLoading, mode = 'create', initial }: EventFormProps) {
   const [timeValue, setTimeValue] = useState('18:00');
   const [categories, setCategories] = useState<string[]>([]);
 
   const form = useForm<EventFormData>({
     resolver: zodResolver(eventSchema),
     defaultValues: {
-      title: '',
-      description: '',
-      location: '',
-      category: '',
-      organizer_email: '',
+      title: initial?.title ?? '',
+      description: initial?.description ?? '',
+      datetime: initial?.datetime ?? undefined,
+      location: initial?.location ?? '',
+      category: initial?.category ?? '',
+      organizer_email: initial?.organizer_email ?? '',
     },
   });
 
-  // fetch distinct categories dynamically from events
+  // When initial changes (opening edit), reset form + time
   useEffect(() => {
-    apiClient
-      .getCategories()
-      .then(setCategories)
-      .catch((err) => {
-        console.error('Failed to fetch categories:', err);
-        setCategories([]); // fallback to empty
+    if (open && mode === 'edit' && initial) {
+      form.reset({
+        title: initial.title ?? '',
+        description: initial.description ?? '',
+        datetime: initial.datetime ?? undefined,
+        location: initial.location ?? '',
+        category: initial.category ?? '',
+        organizer_email: initial.organizer_email ?? '',
       });
+      if (initial.datetime instanceof Date) {
+        const hh = String(initial.datetime.getHours()).padStart(2, '0');
+        const mm = String(initial.datetime.getMinutes()).padStart(2, '0');
+        setTimeValue(`${hh}:${mm}`);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, mode]);
+
+  useEffect(() => {
+    apiClient.getCategories().then(setCategories).catch(() => setCategories([]));
   }, []);
 
   const handleSubmit = async (data: EventFormData) => {
-    // Combine date and time
     const dateTime = new Date(data.datetime);
     const [hours, minutes] = timeValue.split(':');
     dateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
@@ -112,18 +133,23 @@ export function EventForm({ open, onOpenChange, onSubmit, isLoading }: EventForm
 
     await onSubmit(formattedData);
 
-    // Reset form on success
-    form.reset();
-    setTimeValue('18:00');
+    if (mode === 'create') {
+      form.reset();
+      setTimeValue('18:00');
+    }
   };
+
+  const isEdit = mode === 'edit';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="glass-card max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-gradient">Create New Event</DialogTitle>
+          <DialogTitle className="text-gradient">
+            {isEdit ? 'Edit Event' : 'Create New Event'}
+          </DialogTitle>
           <DialogDescription>
-            Fill in the details to create a new event. All fields are required.
+            {isEdit ? 'Update the details and save your changes.' : 'Fill in the details to create a new event. All fields are required.'}
           </DialogDescription>
         </DialogHeader>
 
@@ -153,11 +179,7 @@ export function EventForm({ open, onOpenChange, onSubmit, isLoading }: EventForm
                   <FormItem>
                     <FormLabel>Description</FormLabel>
                     <FormControl>
-                      <Textarea
-                        placeholder="Describe your event..."
-                        className="min-h-[100px]"
-                        {...field}
-                      />
+                      <Textarea placeholder="Describe your event..." className="min-h-[100px]" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -177,16 +199,9 @@ export function EventForm({ open, onOpenChange, onSubmit, isLoading }: EventForm
                           <FormControl>
                             <Button
                               variant="outline"
-                              className={cn(
-                                'w-full pl-3 text-left font-normal',
-                                !field.value && 'text-muted-foreground'
-                              )}
+                              className={cn('w-full pl-3 text-left font-normal', !field.value && 'text-muted-foreground')}
                             >
-                              {field.value ? (
-                                format(field.value, 'PPP')
-                              ) : (
-                                <span>Pick a date</span>
-                              )}
+                              {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
                               <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                             </Button>
                           </FormControl>
@@ -209,12 +224,7 @@ export function EventForm({ open, onOpenChange, onSubmit, isLoading }: EventForm
 
                 <div className="flex flex-col">
                   <label className="text-sm font-medium mb-2">Time</label>
-                  <Input
-                    type="time"
-                    value={timeValue}
-                    onChange={(e) => setTimeValue(e.target.value)}
-                    className="w-full"
-                  />
+                  <Input type="time" value={timeValue} onChange={(e) => setTimeValue(e.target.value)} className="w-full" />
                 </div>
               </div>
 
@@ -254,9 +264,7 @@ export function EventForm({ open, onOpenChange, onSubmit, isLoading }: EventForm
                               </SelectItem>
                             ))
                           ) : (
-                            <div className="p-2 text-sm text-muted-foreground">
-                              No categories available
-                            </div>
+                            <div className="p-2 text-sm text-muted-foreground">No categories available</div>
                           )}
                         </SelectContent>
                       </Select>
@@ -274,11 +282,7 @@ export function EventForm({ open, onOpenChange, onSubmit, isLoading }: EventForm
                   <FormItem>
                     <FormLabel>Organizer Email</FormLabel>
                     <FormControl>
-                      <Input
-                        type="email"
-                        placeholder="organizer@example.com"
-                        {...field}
-                      />
+                      <Input type="email" placeholder="organizer@example.com" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -287,26 +291,17 @@ export function EventForm({ open, onOpenChange, onSubmit, isLoading }: EventForm
             </div>
 
             <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-                disabled={isLoading}
-              >
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
                 Cancel
               </Button>
-              <Button
-                type="submit"
-                disabled={isLoading}
-                className="gradient-primary hover:opacity-90"
-              >
+              <Button type="submit" disabled={isLoading} className="gradient-primary hover:opacity-90">
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Creating...
+                    {isEdit ? 'Saving...' : 'Creating...'}
                   </>
                 ) : (
-                  'Create Event'
+                  isEdit ? 'Save Changes' : 'Create Event'
                 )}
               </Button>
             </DialogFooter>

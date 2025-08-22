@@ -9,7 +9,7 @@ import {
     DialogTitle,
     DialogDescription,
     DialogFooter,
-} from "../UI/dialog";
+} from "../ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/hooks/useAuth";
 import { apiClient } from "../../api";
@@ -283,7 +283,6 @@ export default function ProfileModal({
                 {participantsOpen && <ParticipantsDrawer
                     open={participantsOpen}
                     onOpenChange={setParticipantsOpen}
-                    eventId={0}
                     eventTitle={participantsEvent.title}/>}
             </DialogContent>
         </Dialog>

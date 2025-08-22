@@ -30,13 +30,12 @@ export function ParticipantsDrawer({ open, onOpenChange, eventTitle }: Participa
   const [isAdding, setIsAdding] = useState(false);
   const { toast } = useToast();
 
-  const encodedTitle = encodeURIComponent(eventTitle || '');
-
   const loadParticipants = async () => {
     if (!eventTitle) return;
     setIsLoading(true);
     try {
-      const data = await apiClient.listParticipants(encodedTitle);
+      // ✅ pass raw title; do NOT pre-encode here
+      const data = await apiClient.listParticipants(eventTitle);
       setParticipants(data);
     } catch (error: any) {
       toast({
@@ -58,7 +57,8 @@ export function ParticipantsDrawer({ open, onOpenChange, eventTitle }: Participa
     if (!newParticipantEmail.trim() || isAdding) return;
     setIsAdding(true);
     try {
-      await apiClient.addParticipant(encodedTitle, newParticipantEmail);
+      // ✅ pass raw title; let the api client encode path segments exactly once
+      await apiClient.addParticipant(eventTitle, newParticipantEmail);
       toast({
         title: 'Participant added',
         description: `${newParticipantEmail} has been added to the event`,
@@ -79,7 +79,8 @@ export function ParticipantsDrawer({ open, onOpenChange, eventTitle }: Participa
 
   const handleRemoveParticipant = async (userEmail: string, userName: string) => {
     try {
-      await apiClient.removeParticipant(encodedTitle, userEmail);
+      // ✅ pass raw title
+      await apiClient.removeParticipant(eventTitle, userEmail);
       toast({
         title: 'Participant removed',
         description: `${userName} has been removed from the event`,
