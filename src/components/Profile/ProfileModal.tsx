@@ -15,18 +15,19 @@ import { useAuth } from "@/hooks/useAuth";
 import { apiClient } from "../../api";
 import { ProfileForm, User, Event } from "@/types";
 import { EventCard } from "@/components/Events/EventCard";
+import { ParticipantsDrawer} from "@/components/Participants/ParticipantsDrawer.tsx";
 
 export default function ProfileModal({
                                          open,
                                          onOpenChange,
                                          onSaved,
                                          targetEmail
-                                     }:{
+                                     }: Readonly<{
     open: boolean;
     onOpenChange: (open: boolean) => void;
     onSaved?: (data: ProfileForm) => void;
     targetEmail?: string;
-}) {
+}>) {
     const { user: authUser } = useAuth();
     const [profileUser, setProfileUser] = useState<User | null>(null)
     const [editMode, setEditMode] = useState(false);
@@ -34,6 +35,9 @@ export default function ProfileModal({
     const [error, setError] = useState<string | null >(null);
     const [organizedEvents, setOrganizedEvents] = useState<Event[]>([]);
     const [loadingEvents, setLoadingEvents] = useState(false);
+    const [participantsOpen, setParticipantsOpen] = useState(false);
+    const [participantsEvent, setParticipantsEvent] = useState<Event | null>(null);
+
 
     const [form, setForm] = useState<ProfileForm>({
         name: "",
@@ -78,7 +82,7 @@ export default function ProfileModal({
                 if (!cancelled) {
                     setOrganizedEvents(evts ?? []);
                 }
-            } catch (e: any) {
+            } catch (e) {
                 if (!cancelled) setError(e?.message || "Failed to load profile");
             } finally {
                 if (!cancelled) {
@@ -93,8 +97,8 @@ export default function ProfileModal({
 
     useEffect(()=>{
         setForm({
-            name: (authUser as any).name ?? "",
-            surname: (authUser as any).surname ?? "",
+            name: authUser.name ?? "",
+            surname: authUser.surname ?? "",
             email: authUser.email ?? "",
             password: "",
         });
@@ -136,7 +140,7 @@ export default function ProfileModal({
             onSaved?.(updated);
             setEditMode(false);
             onOpenChange(false);
-        } catch (e: any) {
+        } catch (e) {
             const message = e?.message || e?.error?.message || "Failed to update profile";
             setError(message);
         } finally {
@@ -150,9 +154,10 @@ export default function ProfileModal({
             <DialogContent className="sm:max-w-4xl w-[95vw] h-fit overflow-hidden glass-card border border-card-border flex flex-col">
                 <DialogHeader>
                     <DialogTitle>Profile</DialogTitle>
-                    <DialogDescription>
+                    {isSelf && (<DialogDescription>
                         View your account details. Click Edit profile to update your info.
-                    </DialogDescription>
+                    </DialogDescription>)}
+
                 </DialogHeader>
 
                 {/* Read only summary */}
@@ -248,9 +253,8 @@ export default function ProfileModal({
 
 
                 {/* FIXED: Working horizontal scroll section */}
-                <div className="space-y-2">
-                    <Label className="text-muted-foreground">Organized events</Label>
-
+                {!editMode && (<div className="space-y-2">
+                    <Label className="text-muted-foreground font-bold">Organized events</Label>
                     {loadingEvents ? (
                         <p className="text-sm text-muted-foreground">Loading events…</p>
                     ) : organizedEvents.length === 0 ? (
@@ -258,23 +262,29 @@ export default function ProfileModal({
                     ) : (
                         <div className="w-full -mx-6">
                             <div
-                                className="overflow-x-auto px-6 pb-2"
-                                style={{
-                                    scrollbarWidth: 'thin',
-                                    scrollbarColor: '#cbd5e1 transparent'
-                                }}
+                                className="overflow-x-auto pb-2"                // ← remove px-6 here
+                                style={{ scrollbarWidth: 'thin', scrollbarColor: '#cbd5e1 transparent' }}
                             >
-                                <div className="flex gap-4 w-max">
+                                <div className="flex w-max gap-4 pl-6 pr-6">     {/* ← move padding to the track */}
                                     {organizedEvents.map((evt) => (
-                                        <div key={evt.id} className="flex-shrink-0 w-80 h-349">
-                                            <EventCard event={evt} onManageParticipants={undefined} />
+                                        <div key={evt.title} className="flex-none w-80">
+                                            <EventCard event={evt} onManageParticipants={()=>{
+                                                setParticipantsEvent(evt)
+                                                setParticipantsOpen(true)
+                                            }} />
                                         </div>
                                     ))}
                                 </div>
                             </div>
                         </div>
+
                     )}
-                </div>
+                </div>)}
+                {participantsOpen && <ParticipantsDrawer
+                    open={participantsOpen}
+                    onOpenChange={setParticipantsOpen}
+                    eventId={participantsEvent.id}
+                    eventTitle={participantsEvent.title}/>}
             </DialogContent>
         </Dialog>
     );
