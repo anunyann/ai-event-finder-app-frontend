@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Filter, Search, Calendar, MapPin, Tag } from 'lucide-react';
+import { Plus, Search, Calendar, MapPin, Tag } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/api';
@@ -29,7 +29,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import ProfileModal from "@/components/Profile/ProfileModal.tsx";
+import ProfileModal from '@/components/Profile/ProfileModal.tsx';
 
 export default function Events() {
   const { isAuthenticated } = useAuth();
@@ -43,7 +43,6 @@ export default function Events() {
   const [createFormOpen, setCreateFormOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [participantsDrawerOpen, setParticipantsDrawerOpen] = useState(false);
-  const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
   const [selectedEventTitle, setSelectedEventTitle] = useState('');
 
   // Filters
@@ -55,10 +54,10 @@ export default function Events() {
   const [categories, setCategories] = useState<string[]>(['All Categories']);
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
 
-
   // Profile modal state
   const [profileOpen, setProfileOpen] = useState(false);
   const [targetEmail, setTargetEmail] = useState<string | undefined>();
+
   // Redirect to login if not authenticated
   if (!isAuthenticated) {
     navigate('/login');
@@ -88,7 +87,7 @@ export default function Events() {
       const data = await apiClient.getCategories();
       // ensure uniqueness, trim, and prepend "All Categories"
       const cleaned = Array.from(
-        new Set((data || []).map(c => (c ?? '').trim()).filter(Boolean))
+        new Set((data || []).map((c) => (c ?? '').trim()).filter(Boolean)),
       );
       setCategories(['All Categories', ...cleaned]);
     } catch (error: any) {
@@ -115,24 +114,23 @@ export default function Events() {
     // Search filter
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(event =>
-        event.title.toLowerCase().includes(query) ||
-        event.description.toLowerCase().includes(query) ||
-        event.location.toLowerCase().includes(query)
+      filtered = filtered.filter(
+        (event) =>
+          event.title.toLowerCase().includes(query) ||
+          event.description.toLowerCase().includes(query) ||
+          event.location.toLowerCase().includes(query),
       );
     }
 
     // Category filter
     if (selectedCategory && selectedCategory !== 'All Categories') {
-      filtered = filtered.filter(event => event.category === selectedCategory);
+      filtered = filtered.filter((event) => event.category === selectedCategory);
     }
 
     // Location filter
     if (selectedLocation.trim()) {
       const location = selectedLocation.toLowerCase();
-      filtered = filtered.filter(event =>
-        event.location.toLowerCase().includes(location)
-      );
+      filtered = filtered.filter((event) => event.location.toLowerCase().includes(location));
     }
 
     setFilteredEvents(filtered);
@@ -162,10 +160,11 @@ export default function Events() {
     }
   };
 
-  const handleManageParticipants = (event: Event) => {
-  setSelectedEventTitle(event.title);   // use title only
-  setParticipantsDrawerOpen(true);
-};
+  // ✅ Accept a title string, not an Event
+  const handleManageParticipants = (title: string) => {
+    setSelectedEventTitle(title);
+    setParticipantsDrawerOpen(true);
+  };
 
   const clearFilters = () => {
     setSearchQuery('');
@@ -173,7 +172,7 @@ export default function Events() {
     setSelectedLocation('');
   };
 
-  const uniqueLocations = Array.from(new Set(events.map(event => event.location)));
+  const uniqueLocations = Array.from(new Set(events.map((event) => event.location)));
 
   return (
     <div className="min-h-screen bg-background">
@@ -184,15 +183,10 @@ export default function Events() {
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gradient mb-2">Events</h1>
-            <p className="text-muted-foreground">
-              Discover and manage events in your community
-            </p>
+            <p className="text-muted-foreground">Discover and manage events in your community</p>
           </div>
 
-          <Button
-            onClick={() => setCreateFormOpen(true)}
-            className="gradient-primary hover:opacity-90 mt-4 lg:mt-0"
-          >
+          <Button onClick={() => setCreateFormOpen(true)} className="gradient-primary hover:opacity-90 mt-4 lg:mt-0">
             <Plus className="h-4 w-4 mr-2" />
             Create Event
           </Button>
@@ -238,14 +232,9 @@ export default function Events() {
               <DropdownMenuContent className="glass-card w-[200px]">
                 <DropdownMenuLabel>Locations</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => setSelectedLocation('')}>
-                  All Locations
-                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSelectedLocation('')}>All Locations</DropdownMenuItem>
                 {uniqueLocations.slice(0, 10).map((location) => (
-                  <DropdownMenuItem
-                    key={location}
-                    onClick={() => setSelectedLocation(location)}
-                  >
+                  <DropdownMenuItem key={location} onClick={() => setSelectedLocation(location)}>
                     {location}
                   </DropdownMenuItem>
                 ))}
@@ -263,10 +252,10 @@ export default function Events() {
           {/* Filter Results Summary */}
           <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <span>Showing {filteredEvents.length} of {events.length} events</span>
-              {filteredEvents.length !== events.length && (
-                <Badge variant="secondary">Filtered</Badge>
-              )}
+              <span>
+                Showing {filteredEvents.length} of {events.length} events
+              </span>
+              {filteredEvents.length !== events.length && <Badge variant="secondary">Filtered</Badge>}
             </div>
           </div>
         </div>
@@ -293,15 +282,11 @@ export default function Events() {
             <h3 className="text-lg font-semibold mb-2">No events found</h3>
             <p className="text-muted-foreground mb-6">
               {events.length === 0
-                ? "There are no events yet. Create the first one!"
-                : "No events match your current filters. Try adjusting your search criteria."
-              }
+                ? 'There are no events yet. Create the first one!'
+                : 'No events match your current filters. Try adjusting your search criteria.'}
             </p>
             {events.length === 0 && (
-              <Button
-                onClick={() => setCreateFormOpen(true)}
-                className="gradient-primary hover:opacity-90"
-              >
+              <Button onClick={() => setCreateFormOpen(true)} className="gradient-primary hover:opacity-90">
                 <Plus className="h-4 w-4 mr-2" />
                 Create First Event
               </Button>
@@ -315,8 +300,8 @@ export default function Events() {
                 event={event}
                 onManageParticipants={() => handleManageParticipants(event.title)}
                 onUserClick={(email) => {
-                    setTargetEmail(email)
-                    setProfileOpen(true)
+                  setTargetEmail(email);
+                  setProfileOpen(true);
                 }}
               />
             ))}
@@ -332,19 +317,15 @@ export default function Events() {
         isLoading={isCreating}
       />
 
-      {/*User modal*/}
-      <ProfileModal
-          open={profileOpen}
-          onOpenChange={setProfileOpen}
-          targetEmail={targetEmail}
-      />
+      {/* User modal */}
+      <ProfileModal open={profileOpen} onOpenChange={setProfileOpen} targetEmail={targetEmail} />
 
       {/* Participants Drawer */}
       <ParticipantsDrawer
-  open={participantsDrawerOpen}
-  onOpenChange={setParticipantsDrawerOpen}
-  eventTitle={selectedEventTitle}
-/>
+        open={participantsDrawerOpen}
+        onOpenChange={setParticipantsDrawerOpen}
+        eventTitle={selectedEventTitle}
+      />
     </div>
   );
 }

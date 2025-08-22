@@ -30,11 +30,13 @@ export function ParticipantsDrawer({ open, onOpenChange, eventTitle }: Participa
   const [isAdding, setIsAdding] = useState(false);
   const { toast } = useToast();
 
+  const encodedTitle = encodeURIComponent(eventTitle || '');
+
   const loadParticipants = async () => {
     if (!eventTitle) return;
     setIsLoading(true);
     try {
-      const data = await apiClient.listParticipants(eventTitle);
+      const data = await apiClient.listParticipants(encodedTitle);
       setParticipants(data);
     } catch (error: any) {
       toast({
@@ -56,7 +58,7 @@ export function ParticipantsDrawer({ open, onOpenChange, eventTitle }: Participa
     if (!newParticipantEmail.trim() || isAdding) return;
     setIsAdding(true);
     try {
-      await apiClient.addParticipant(eventTitle, newParticipantEmail); // ✅ uses title
+      await apiClient.addParticipant(encodedTitle, newParticipantEmail);
       toast({
         title: 'Participant added',
         description: `${newParticipantEmail} has been added to the event`,
@@ -77,7 +79,7 @@ export function ParticipantsDrawer({ open, onOpenChange, eventTitle }: Participa
 
   const handleRemoveParticipant = async (userEmail: string, userName: string) => {
     try {
-      await apiClient.removeParticipant(eventTitle, userEmail); // uses title
+      await apiClient.removeParticipant(encodedTitle, userEmail);
       toast({
         title: 'Participant removed',
         description: `${userName} has been removed from the event`,
@@ -107,7 +109,7 @@ export function ParticipantsDrawer({ open, onOpenChange, eventTitle }: Participa
         </SheetHeader>
 
         <div className="mt-6 space-y-6">
-          {/* Add Participant Form */}
+          {/* Add Participant */}
           <div className="glass-card p-4">
             <Label htmlFor="participant-email" className="text-sm font-medium">
               Add Participant
