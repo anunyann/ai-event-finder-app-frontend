@@ -283,7 +283,7 @@ export default function ProfileModal({
                 {participantsOpen && <ParticipantsDrawer
                     open={participantsOpen}
                     onOpenChange={setParticipantsOpen}
-                    eventId={participantsEvent.id}
+                    eventId={0}
                     eventTitle={participantsEvent.title}/>}
             </DialogContent>
         </Dialog>
