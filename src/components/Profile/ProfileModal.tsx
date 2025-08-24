@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Button } from "@/components/UI/button";
-import { Input } from "@/components/UI/input";
-import { Label } from "@/components/UI/label";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
     Dialog,
     DialogContent,
@@ -9,8 +9,8 @@ import {
     DialogTitle,
     DialogDescription,
     DialogFooter,
-} from "../UI/dialog.tsx";
-import { Separator } from "@/components/UI/separator";
+} from "@/components/ui/dialog.tsx";
+import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/hooks/useAuth";
 import { apiClient } from "../../api";
 import { ProfileForm, User, Event } from "@/types";

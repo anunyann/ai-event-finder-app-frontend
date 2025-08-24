@@ -4,18 +4,18 @@ import { User } from '@/types';
 import { apiClient } from '@/api';
 import { useToast } from '@/hooks/use-toast';
 
-import { Button } from '@/components/UI/button';
-import { Input } from '@/components/UI/input';
-import { Label } from '@/components/UI/label';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from '@/components/UI/sheet';
-import { Badge } from '@/components/UI/badge';
-import { Separator } from '@/components/UI/separator';
+} from '@/components/ui/sheet';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 
 interface ParticipantsDrawerProps {
   open: boolean;

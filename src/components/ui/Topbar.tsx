@@ -1,14 +1,14 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { LogOut, MessageSquare, Calendar } from 'lucide-react';
-import { Button } from '@/components/UI/button';
-import { Avatar, AvatarFallback } from '@/components/UI/avatar';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/UI/dropdown-menu';
+} from '@/components/ui/dropdown-menu';
 import { ThemeToggle } from './ThemeToggle';
 import { useAuth } from '@/hooks/useAuth';
 import ProfileModal from '../Profile/ProfileModal';

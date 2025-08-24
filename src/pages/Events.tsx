@@ -6,21 +6,21 @@ import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/api';
 import { Event } from '@/types';
 
-import { Topbar } from '@/components/UI/Topbar';
+import { Topbar } from '@/components/ui/Topbar';
 import { EventCard } from '@/components/Events/EventCard';
 import { EventForm } from '@/components/Events/EventForm';
 import { ParticipantsDrawer } from '@/components/Participants/ParticipantsDrawer';
 
-import { Button } from '@/components/UI/button';
-import { Input } from '@/components/UI/input';
-import { Badge } from '@/components/UI/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/UI/select';
+} from '@/components/ui/select';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,7 +28,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/UI/dropdown-menu';
+} from '@/components/ui/dropdown-menu';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -38,7 +38,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/UI/alert-dialog';
+} from '@/components/ui/alert-dialog';
 import ProfileModal from '@/components/Profile/ProfileModal.tsx';
 
 export default function Events() {
@@ -246,7 +246,7 @@ export default function Events() {
   const confirmDelete = async () => {
   if (!deleteTarget) return;
 
-  // Optimistically remove from UI right away
+  // Optimistically remove from ui right away
   const title = deleteTarget.title;
   setEvents(prev => prev.filter(e => e.title !== title));
   setFilteredEvents(prev => prev.filter(e => e.title !== title));
@@ -263,7 +263,7 @@ export default function Events() {
     await loadEvents();
     await loadCategories();
   } catch (error: any) {
-    // If the delete fails, reload to revert optimistic UI
+    // If the delete fails, reload to revert optimistic ui
     await loadEvents();
     toast({
       title: 'Error deleting event',

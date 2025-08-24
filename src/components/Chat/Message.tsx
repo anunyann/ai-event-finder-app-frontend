@@ -5,8 +5,8 @@ import remarkGfm from 'remark-gfm';
 import { formatEventDateTime } from '@/lib/format';
 import { Event } from '@/types';
 import { Calendar, MapPin, User, Clock, Sparkles, Copy, Check } from 'lucide-react';
-import { Badge } from '../UI/badge.tsx';
-import { Button } from '@/components/UI/button';
+import { Badge } from '@/components/ui/badge.tsx';
+import { Button } from '@/components/ui/button';
 
 interface MessageProps {
   type: 'user' | 'ai';

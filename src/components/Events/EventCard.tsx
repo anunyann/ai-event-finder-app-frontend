@@ -1,9 +1,9 @@
 import { Event } from '@/types';
 import { formatEventDateTime } from '@/lib/format';
 import { Calendar, MapPin, User, Users, Pencil, Trash2 } from 'lucide-react';
-import { Button } from '@/components/UI/button';
+import { Button } from '@/components/ui/button';
 import {useAuth} from "@/hooks/useAuth.ts";
-import { Badge  } from "../UI/badge.tsx";
+import { Badge  } from "@/components/ui/badge.tsx";
 
 interface EventCardProps {
   event: Event;

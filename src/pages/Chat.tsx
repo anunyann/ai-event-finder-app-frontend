@@ -4,7 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useChat } from '@/hooks/useChat';
 import { Event } from '@/types';
 
-import { Topbar } from '@/components/UI/Topbar';
+import { Topbar } from '@/components/ui/Topbar';
 import { ChatPane } from '@/components/Chat/ChatPane';
 import { Composer } from '@/components/Chat/Composer';
 import { ParticipantsDrawer } from '@/components/Participants/ParticipantsDrawer';

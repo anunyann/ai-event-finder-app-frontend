@@ -4,11 +4,11 @@ import { Eye, EyeOff, Loader2, MessageSquare } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 
-import { Button } from '@/components/UI/button';
-import { Input } from '@/components/UI/input';
-import { Label } from '@/components/UI/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/UI/card';
-import { Separator } from '@/components/UI/separator';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 
 export default function Login() {
   const [email, setEmail] = useState('');
