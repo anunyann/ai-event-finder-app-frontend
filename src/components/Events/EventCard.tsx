@@ -2,7 +2,8 @@ import { Event } from '@/types';
 import { formatEventDateTime } from '@/lib/format';
 import { Calendar, MapPin, User, Users, Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import {useAuth} from "@/hooks/useAuth.ts";
+import { Badge  } from "../UI/badge.tsx";
 
 interface EventCardProps {
   event: Event;
@@ -14,7 +15,8 @@ interface EventCardProps {
 
 export function EventCard({ event, onManageParticipants, onUserClick, onEdit, onDelete }: EventCardProps) {
   const organizerEmail = event.organizer?.email ?? '';
-
+  const { user: authUser }= useAuth()
+      const isSelf = organizerEmail === authUser.email;
   return (
     <div className="glass-card-hover p-6 group h-full flex flex-col">
       {/* Header */}
@@ -82,29 +84,29 @@ export function EventCard({ event, onManageParticipants, onUserClick, onEdit, on
           <Users className="h-4 w-4 mr-2" />
           Participants
         </Button>
+          {isSelf && (<div className="flex items-center gap-2">
+              <Button
+                  variant="ghost"
+                  size="icon"
+                  className="hover:bg-primary/10"
+                  onClick={() => onEdit?.(event)}
+                  aria-label="Edit event"
+                  title="Edit"
+              >
+                  <Pencil className="h-4 w-4" />
+              </Button>
+              <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                  onClick={() => onDelete?.(event)}
+                  aria-label="Delete event"
+                  title="Delete"
+              >
+                  <Trash2 className="h-4 w-4" />
+              </Button>
+          </div>)}
 
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="hover:bg-primary/10"
-            onClick={() => onEdit?.(event)}
-            aria-label="Edit event"
-            title="Edit"
-          >
-            <Pencil className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-destructive hover:text-destructive hover:bg-destructive/10"
-            onClick={() => onDelete?.(event)}
-            aria-label="Delete event"
-            title="Delete"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
       </div>
     </div>
   );

@@ -9,7 +9,7 @@ import {
     DialogTitle,
     DialogDescription,
     DialogFooter,
-} from "../ui/dialog";
+} from "../UI/dialog.tsx";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/hooks/useAuth";
 import { apiClient } from "../../api";

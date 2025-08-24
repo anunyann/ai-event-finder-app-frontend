@@ -1,0 +1,32 @@
+# render.yaml
+services:
+  - type: web
+    name: ai-event-finder-web
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    plan: free
+    region: frankfurt
+    autoDeploy: true
+    branch: main
+
+    envVars:
+      # Set your backend URL here (will override anything in .env at build/runtime)
+      - key: VITE_API_BASE_URL
+        value: https://ai-event-finder.onrender.com      # (Optional) lock Node version used for the build
+      - key: NODE_VERSION
+        value: 20
+
+    routes:
+      # SPA routing: send all paths to index.html
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+    headers:
+      # Sensible caching defaults for static assets; index.html stays un-cached
+      - path: /assets/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+      - path: /index.html
+        name: Cache-Control
+        value: no-cache

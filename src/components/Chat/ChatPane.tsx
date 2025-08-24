@@ -7,9 +7,10 @@ interface ChatPaneProps {
   messages: ChatMessage[];
   isLoading: boolean;
   onEventClick?: (event: Event) => void;
+  onCardClick?: (message: string) => void;
 }
 
-export function ChatPane({ messages, isLoading, onEventClick }: ChatPaneProps) {
+export function ChatPane({ messages, isLoading, onEventClick, onCardClick }: ChatPaneProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -48,30 +49,25 @@ export function ChatPane({ messages, isLoading, onEventClick }: ChatPaneProps) {
               <p className="text-muted-foreground text-lg mb-6">
                 Ask me anything about events! I can help you find, filter, and discover events that match your interests.
               </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
-                <div className="glass-card p-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left" >
+                <div className="glass-card p-4 col-span-2 text-center cursor-pointer" onClick={()=>onCardClick("Find tech meetups in New York")}>
                   <h3 className="font-semibold mb-2">🔍 Search Events</h3>
-                  <p className="text-sm text-muted-foreground">
+                  <button className="text-sm text-muted-foreground" >
                     "Find tech meetups in New York"
-                  </p>
+                  </button>
                 </div>
-                <div className="glass-card p-4">
-                  <h3 className="font-semibold mb-2">📅 Filter by Date</h3>
-                  <p className="text-sm text-muted-foreground">
-                    "Show me events this weekend"
-                  </p>
-                </div>
-                <div className="glass-card p-4">
+
+                <div className="glass-card p-4 cursor-pointer" onClick={()=>onCardClick("Business networking events")}>
                   <h3 className="font-semibold mb-2">🏢 Find by Category</h3>
-                  <p className="text-sm text-muted-foreground">
+                  <div className="text-sm text-muted-foreground" >
                     "Business networking events"
-                  </p>
+                  </div>
                 </div>
-                <div className="glass-card p-4">
+                <div className="glass-card p-4 cursor-pointer"  onClick={()=>onCardClick("Events near downtown San Francisco")}>
                   <h3 className="font-semibold mb-2">📍 Location-based</h3>
-                  <p className="text-sm text-muted-foregreen">
-                    "Events near downtown Seattle"
-                  </p>
+                  <button className="text-sm text-muted-foregreen">
+                    "Events near downtown San Francisco"
+                  </button>
                 </div>
               </div>
             </div>

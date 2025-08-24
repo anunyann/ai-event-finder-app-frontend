@@ -38,7 +38,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+} from '../components/UI/alert-dialog.tsx';
 import ProfileModal from '@/components/Profile/ProfileModal.tsx';
 
 export default function Events() {
@@ -85,17 +85,21 @@ export default function Events() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [targetEmail, setTargetEmail] = useState<string | undefined>();
 
-  if (!isAuthenticated) {
-    navigate('/login');
-    return null;
-  }
 
-  const loadEvents = async () => {
+
+    const getTime = (e: Event) =>
+        e.datetime ? new Date(e.datetime).getTime() : Number.POSITIVE_INFINITY;
+
+    const sortEvents = (list: Event[]) => [...list].sort((a, b) => getTime(a) - getTime(b));
+
+
+    const loadEvents = async () => {
     setIsLoading(true);
     try {
       const data = await apiClient.getEvents();
-      setEvents(data);
-      setFilteredEvents(data);
+      const sorted = sortEvents(data);
+      setEvents(sorted);
+      setFilteredEvents(sorted);
     } catch (error: any) {
       toast({
         title: 'Error loading events',
@@ -123,7 +127,11 @@ export default function Events() {
       setIsLoadingCategories(false);
     }
   };
+  useEffect(() => {
+        if (!isAuthenticated) {
+            navigate('/login', { replace: true });}
 
+    }, [isAuthenticated, navigate]);
   useEffect(() => {
     loadEvents();
     loadCategories();
@@ -152,7 +160,7 @@ export default function Events() {
       filtered = filtered.filter((event) => event.location.toLowerCase().includes(location));
     }
 
-    setFilteredEvents(filtered);
+    setFilteredEvents(sortEvents(filtered));
   }, [events, searchQuery, selectedCategory, selectedLocation]);
 
   const handleCreateEvent = async (eventData: any) => {
@@ -272,8 +280,10 @@ export default function Events() {
   };
 
   const uniqueLocations = Array.from(new Set(events.map((event) => event.location)));
+  if (!isAuthenticated) return null;
 
-  return (
+
+    return (
     <div className="min-h-screen bg-background">
       <Topbar />
 
