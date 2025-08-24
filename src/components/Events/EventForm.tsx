@@ -8,8 +8,8 @@ import { cn } from '@/lib/utils';
 import { formatToApiDateTime } from '@/lib/format';
 import { apiClient } from '@/api';
 
-import { Button } from '@/components/UI/button';
-import { Calendar } from '../UI/calendar.tsx';
+import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar.tsx';
 import {
   Dialog,
   DialogContent,
@@ -17,7 +17,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/UI/dialog';
+} from '@/components/ui/dialog';
 import {
   Form,
   FormControl,
@@ -25,21 +25,21 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/UI/form';
-import { Input } from '@/components/UI/input';
-import { Textarea } from '@/components/UI/textarea';
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@/components/UI/popover';
+} from '@/components/ui/popover';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/UI/select';
+} from '@/components/ui/select';
 
 const eventSchema = z.object({
   title: z.string().min(1, 'Title is required').max(200, 'Title too long'),
