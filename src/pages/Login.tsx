@@ -4,11 +4,11 @@ import { Eye, EyeOff, Loader2, MessageSquare } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/UI/button';
+import { Input } from '@/components/UI/input';
+import { Label } from '@/components/UI/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/UI/card';
+import { Separator } from '@/components/UI/separator';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -81,8 +81,8 @@ export default function Login() {
       <div className="w-full max-w-md space-y-8">
         {/* Header */}
         <div className="text-center">
-          <div className="w-16 h-16 gradient-primary rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <MessageSquare className="h-8 w-8 text-white" />
+          <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <img src="public/favicon.ico" width="max" height="max"/>
           </div>
           <h1 className="text-3xl font-bold text-gradient">
             AI Event Finder

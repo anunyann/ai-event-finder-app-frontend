@@ -1,7 +1,7 @@
-import { useState, useRef, KeyboardEvent } from 'react';
+import { useState, useEffect, useRef, KeyboardEvent } from 'react';
 import { Send, History } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
+import { Textarea } from '../UI/textarea.tsx';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,11 +13,17 @@ interface ComposerProps {
   onSendMessage: (message: string) => void;
   isLoading: boolean;
   recentPrompts: string[];
+  propagatedMessage: string | '';
 }
 
-export function Composer({ onSendMessage, isLoading, recentPrompts }: ComposerProps) {
-  const [message, setMessage] = useState('');
+export function Composer({ onSendMessage, isLoading, recentPrompts, propagatedMessage }: ComposerProps) {
+  const [message, setMessage] = useState(propagatedMessage);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+        setMessage(propagatedMessage ?? '');
+        if (propagatedMessage) textareaRef.current?.focus();
+    }, [propagatedMessage]);
 
   const handleSubmit = () => {
     if (message.trim() && !isLoading) {
@@ -38,7 +44,8 @@ export function Composer({ onSendMessage, isLoading, recentPrompts }: ComposerPr
     textareaRef.current?.focus();
   };
 
-  return (
+
+    return (
     <div className="sticky bottom-0 bg-background/80 backdrop-blur-lg border-t border-border p-4">
       <div className="max-w-4xl mx-auto">
         <div className="glass-card p-4">

@@ -9,7 +9,7 @@ import { formatToApiDateTime } from '@/lib/format';
 import { apiClient } from '@/api';
 
 import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
+import { Calendar } from '../UI/calendar.tsx';
 import {
   Dialog,
   DialogContent,
@@ -17,7 +17,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+} from '@/components/UI/dialog';
 import {
   Form,
   FormControl,
@@ -25,21 +25,21 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
+} from '@/components/UI/form';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { Textarea } from '@/components/UI/textarea';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@/components/ui/popover';
+} from '@/components/UI/popover';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from '@/components/UI/select';
 
 const eventSchema = z.object({
   title: z.string().min(1, 'Title is required').max(200, 'Title too long'),
@@ -157,19 +157,21 @@ export function EventForm({ open, onOpenChange, onSubmit, isLoading, mode = 'cre
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
             <div className="grid grid-cols-1 gap-6">
               {/* Title */}
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Event Title</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter event title" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                {!isEdit && (<FormField
+                    control={form.control}
+                    name="title"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Event Title</FormLabel>
+                            <FormControl>
+                                <Input placeholder="Enter event title" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />)}
+
+
 
               {/* Description */}
               <FormField
@@ -275,19 +277,20 @@ export function EventForm({ open, onOpenChange, onSubmit, isLoading, mode = 'cre
               </div>
 
               {/* Organizer Email */}
-              <FormField
-                control={form.control}
-                name="organizer_email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Organizer Email</FormLabel>
-                    <FormControl>
-                      <Input type="email" placeholder="organizer@example.com" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                {!isEdit && (<FormField
+                    control={form.control}
+                    name="organizer_email"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Organizer Email</FormLabel>
+                            <FormControl>
+                                <Input type="email" placeholder="organizer@example.com" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />)}
+
             </div>
 
             <DialogFooter>

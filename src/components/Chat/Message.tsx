@@ -5,8 +5,8 @@ import remarkGfm from 'remark-gfm';
 import { formatEventDateTime } from '@/lib/format';
 import { Event } from '@/types';
 import { Calendar, MapPin, User, Clock, Sparkles, Copy, Check } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Badge } from '../UI/badge.tsx';
+import { Button } from '@/components/UI/button';
 
 interface MessageProps {
   type: 'user' | 'ai';
@@ -20,8 +20,8 @@ function extractAIText(raw: string): string {
   if (!raw) return '';
   try {
     const obj = JSON.parse(raw);
-    if (obj && typeof obj === 'object' && typeof (obj as any).response === 'string') {
-      return (obj as any).response;
+    if (obj && typeof obj === 'object' && typeof (obj).response === 'string') {
+      return (obj).response;
     }
     return JSON.stringify(obj, null, 2);
   } catch {
@@ -34,11 +34,9 @@ function RichAIContent({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
-    try {
       await navigator.clipboard.writeText(text);
       setCopied(true);
       setTimeout(() => setCopied(false), 1200);
-    } catch {}
   };
 
   return (
@@ -71,7 +69,7 @@ function RichAIContent({ text }: { text: string }) {
             components={{
               li({ children, ...props }) {
                 return (
-                  <li {...props} className="list-disc marker:text-muted-foreground">
+                  <li {...props} className="list-none marker:text-muted-foreground decoration-0">
                     {children}
                   </li>
                 );

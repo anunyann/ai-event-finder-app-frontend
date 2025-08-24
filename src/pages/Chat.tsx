@@ -17,6 +17,8 @@ export default function Chat() {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [participantsOpen, setParticipantsOpen] = useState(false);
 
+  const [propagatedMessage, setPropagatedMessage] = useState<string>("");
+
   // Redirect to login if not authenticated
   if (!isAuthenticated) {
     navigate('/login');
@@ -38,6 +40,7 @@ export default function Chat() {
           messages={messages}
           isLoading={isLoading}
           onEventClick={handleEventClick}
+          onCardClick={(message)=>{setPropagatedMessage(message)}}
         />
 
         {/* Message Composer */}
@@ -45,6 +48,7 @@ export default function Chat() {
           onSendMessage={sendMessage}
           isLoading={isLoading}
           recentPrompts={recentPrompts}
+          propagatedMessage={propagatedMessage}
         />
       </div>
 
