@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef, KeyboardEvent } from 'react';
 import { Send, History } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/UI/button';
 import { Textarea } from '../UI/textarea.tsx';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from '@/components/UI/dropdown-menu';
 
 interface ComposerProps {
   onSendMessage: (message: string) => void;

@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 import { formatToApiDateTime } from '@/lib/format';
 import { apiClient } from '@/api';
 
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/UI/button';
 import { Calendar } from '../UI/calendar.tsx';
 import {
   Dialog,
@@ -26,7 +26,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/UI/form';
-import { Input } from '@/components/ui/input';
+import { Input } from '@/components/UI/input';
 import { Textarea } from '@/components/UI/textarea';
 import {
   Popover,
