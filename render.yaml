@@ -3,7 +3,6 @@ services:
     name: ai-event-finder-web
     env: static
     plan: free
-    region: frankfurt
     branch: main
     autoDeploy: true
 
