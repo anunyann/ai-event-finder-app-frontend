@@ -38,7 +38,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '../components/UI/alert-dialog.tsx';
+} from '../components/UI/alert-dialog';
 import ProfileModal from '@/components/Profile/ProfileModal.tsx';
 
 export default function Events() {
