@@ -1,7 +1,7 @@
 import { Event } from '@/types';
 import { formatEventDateTime } from '@/lib/format';
 import { Calendar, MapPin, User, Users, Pencil, Trash2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/UI/button';
 import {useAuth} from "@/hooks/useAuth.ts";
 import { Badge  } from "../UI/badge.tsx";
 

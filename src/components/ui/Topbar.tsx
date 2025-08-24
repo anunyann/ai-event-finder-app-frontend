@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { LogOut, MessageSquare, Calendar } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/UI/button';
 import { Avatar, AvatarFallback } from '@/components/UI/avatar';
 import {
   DropdownMenu,
@@ -69,7 +69,7 @@ export function Topbar() {
         {/* User Controls */}
         <div className="flex items-center space-x-3">
           <ThemeToggle />
-          
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-9 w-9 rounded-full">

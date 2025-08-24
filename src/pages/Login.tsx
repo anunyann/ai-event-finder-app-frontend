@@ -55,7 +55,7 @@ export default function Login() {
         setIsSignUp(false);
         setName('');
         setSurname('');
-      } catch (error: any) {
+      } catch (error) {
         toast({
           title: 'Sign up failed',
           description: error.message || 'Failed to create account',
