@@ -8,7 +8,7 @@ import {
   ProfileForm,
 } from './types';
 
-const BASE_URL = '/api';
+const BASE_URL = 'https://ai-event-finder.onrender.com';
 
 class ApiClient {
   private getToken(): string | null {
