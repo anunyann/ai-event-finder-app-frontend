@@ -11,16 +11,16 @@ import { EventCard } from '@/components/Events/EventCard';
 import { EventForm } from '@/components/Events/EventForm';
 import { ParticipantsDrawer } from '@/components/Participants/ParticipantsDrawer';
 
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/UI/button';
+import { Input } from '@/components/UI/input';
+import { Badge } from '@/components/UI/badge';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from '@/components/UI/select';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,7 +28,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from '@/components/UI/dropdown-menu';
 import {
   AlertDialog,
   AlertDialogAction,
