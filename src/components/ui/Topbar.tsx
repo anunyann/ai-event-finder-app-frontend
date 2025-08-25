@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { ThemeToggle } from './ThemeToggle';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { useAuth } from '@/hooks/useAuth';
 import ProfileModal from '../Profile/ProfileModal';
 import { useState } from 'react';
@@ -18,8 +18,10 @@ export function Topbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [profileOpen, setProfileOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  const handleLogout = () => {
+
+    const handleLogout = () => {
     logout();
     navigate('/login');
   };
@@ -36,7 +38,7 @@ export function Topbar() {
         <div className="flex items-center space-x-6">
           <Link to="/" className="flex items-center space-x-2 group">
             <div className="w-8 h-8 gradient-primary rounded-lg flex items-center justify-center">
-              <img src="../../../public/favicon.ico"></img>
+              <img src="/favicon.ico"></img>
             </div>
             <span className="text-xl font-bold text-gradient">
               AI Event Finder
@@ -70,34 +72,48 @@ export function Topbar() {
         <div className="flex items-center space-x-3">
           <ThemeToggle />
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-9 w-9 rounded-full">
-                <Avatar className="h-9 w-9">
-                  <AvatarFallback className="bg-primary text-primary-foreground">
-                    {getUserInitials()}
-                  </AvatarFallback>
-                </Avatar>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56 glass-card" align="end">
-              <div className="flex items-center justify-start gap-2 p-2">
-                <div className="flex flex-col space-y-1 leading-none">
-                  <p className="font-medium text-sm">
-                    {user?.email || 'User'}
-                  </p>
-                  <Button onClick={()=>{setProfileOpen(true)}} className="btn btn-blue">
-                    View profile
-                  </Button>
-                </div>
-              </div>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive">
-                <LogOut className="mr-2 h-4 w-4" />
-                <span>Log out</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+            <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="relative h-9 w-9 rounded-full">
+                        <Avatar className="h-9 w-9">
+                            <AvatarFallback className="bg-primary text-primary-foreground">
+                                {getUserInitials()}
+                            </AvatarFallback>
+                        </Avatar>
+                    </Button>
+                </DropdownMenuTrigger>
+
+                <DropdownMenuContent className="w-56 glass-card" align="end">
+                    <div className="flex items-center justify-start gap-2 p-2">
+                        <div className="flex flex-col space-y-1 leading-none">
+                            <p className="font-medium text-sm">{user?.email || "User"}</p>
+                        </div>
+                    </div>
+
+                    <DropdownMenuSeparator />
+
+                    {/* Use a real menu item so the dropdown closes properly */}
+                    <DropdownMenuItem
+                        onSelect={() => {
+                            // 1) close the menu
+                            setMenuOpen(false);
+                            // 2) after it's unmounted, open the dialog
+                            requestAnimationFrame(() => setProfileOpen(true));
+                        }}
+                    >
+                        View profile
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem
+                        onSelect={handleLogout}
+                        className="text-destructive focus:text-destructive"
+                    >
+                        <LogOut className="mr-2 h-4 w-4" />
+                        <span>Log out</span>
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+
         </div>
       </div>
       <ProfileModal 

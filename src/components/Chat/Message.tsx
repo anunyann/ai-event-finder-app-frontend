@@ -20,8 +20,8 @@ function extractAIText(raw: string): string {
   if (!raw) return '';
   try {
     const obj = JSON.parse(raw);
-    if (obj && typeof obj === 'object' && typeof (obj).response === 'string') {
-      return (obj).response;
+    if (obj && typeof obj === 'object' && typeof (obj).answer === 'string') {
+      return (obj).answer;
     }
     return JSON.stringify(obj, null, 2);
   } catch {
