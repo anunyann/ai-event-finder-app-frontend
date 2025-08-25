@@ -142,7 +142,7 @@ export function EventForm({ open, onOpenChange, onSubmit, isLoading, mode = 'cre
   const isEdit = mode === 'edit';
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
       <DialogContent className="glass-card max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-gradient">

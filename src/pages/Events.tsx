@@ -100,7 +100,7 @@ export default function Events() {
       const sorted = sortEvents(data);
       setEvents(sorted);
       setFilteredEvents(sorted);
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: 'Error loading events',
         description: error.message || 'Failed to load events',

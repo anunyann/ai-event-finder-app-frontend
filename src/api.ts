@@ -106,12 +106,48 @@ class ApiClient {
     return this.request<User[]>('/users');
   }
 
-  async updateUser(updated: ProfileForm) {
-    // Placeholder until backend update route exists
-    return updated;
-  }
+    // api.ts
+    async updateUser(updated: ProfileForm): Promise<User> {
+        // Must be logged in
+        const token = this.getToken();
+        if (!token) {
+            throw { code: "UNAUTHORIZED", message: "Please log in to update your profile." } as ApiError;
+        }
 
-  // -------- Events --------
+        // Identify the current user (only self-updates are allowed)
+        let currentEmail: string | null = null;
+        try {
+            const raw = localStorage.getItem("user");
+            if (raw) {
+                const u = JSON.parse(raw) as { email?: string };
+                currentEmail = (u.email ?? "").trim().toLowerCase();
+            }
+        } catch {
+            /* ignore parse errors */
+        }
+        if (!currentEmail) {
+            throw { code: "MISSING_IDENTIFIER", message: "Current user email not found." } as ApiError;
+        }
+
+        // Build payload with allowed fields only (email cannot be changed)
+        const body: Record<string, string> = {};
+        if (typeof updated.name === "string" && updated.name.trim()) body.name = updated.name.trim();
+        if (typeof updated.surname === "string" && updated.surname.trim()) body.surname = updated.surname.trim();
+        if (typeof updated.password === "string" && updated.password.trim()) body.password = updated.password.trim();
+
+        if (Object.keys(body).length === 0) {
+            throw { code: "NO_FIELDS", message: "Nothing to update." } as ApiError;
+        }
+
+        // Backend: PUT /users/email/<email>
+        return this.request<User>(`/users/email/${encodeURIComponent(currentEmail)}`, {
+            method: "PUT",
+            body: JSON.stringify(body),
+        });
+    }
+
+
+    // -------- Events --------
   async getEvents(): Promise<Event[]> {
     return this.request<Event[]>('/events');
   }
