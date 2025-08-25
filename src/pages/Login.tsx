@@ -82,7 +82,7 @@ export default function Login() {
         {/* Header */}
         <div className="text-center">
           <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <img src="public/favicon.ico" width="max" height="max"/>
+                <img src="/favicon.ico" width="max" height="max"/>
           </div>
           <h1 className="text-3xl font-bold text-gradient">
             AI Event Finder
